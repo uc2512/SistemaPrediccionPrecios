@@ -1172,6 +1172,563 @@ Total de datos históricos: {len(datos)}
         canvas.create_text(legend_x+20, legend_y+30,
             text="Predicción", font=("Arial", 8), fill="#e2e8f0", anchor="w")
     
+    def prediccion_estacional(self):
+        """Análisis de patrones estacionales"""
+        # Crear ventana
+        ventana = tk.Toplevel(self.frame_principal)
+        ventana.title("Predicción - Análisis Estacional")
+        ventana.geometry("900x700")
+        ventana.configure(bg="#0a0f1e")
+        ventana.transient(self.frame_principal)
+        
+        # Header
+        tk.Label(ventana,
+            text="🔄 ANÁLISIS ESTACIONAL",
+            font=("Arial", 14, "bold"),
+            bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
+        
+        tk.Label(ventana,
+            text="Detecta patrones que se repiten en ciclos de tiempo",
+            font=("Arial", 10),
+            bg="#0a0f1e", fg="#94a3b8").pack()
+        
+        # Frame de selección
+        frame_seleccion = tk.Frame(ventana, bg="#1e293b")
+        frame_seleccion.pack(fill=tk.X, padx=20, pady=15)
+        
+        # Producto
+        tk.Label(frame_seleccion,
+            text="Producto:",
+            font=("Arial", 10, "bold"),
+            bg="#1e293b", fg="#e2e8f0").grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        
+        combo_producto = ttk.Combobox(frame_seleccion,
+            values=list(self.productos_dict.values()),
+            state="readonly",
+            font=("Arial", 10),
+            width=30)
+        combo_producto.grid(row=0, column=1, padx=10, pady=5)
+        
+        # Mercado
+        tk.Label(frame_seleccion,
+            text="Mercado:",
+            font=("Arial", 10, "bold"),
+            bg="#1e293b", fg="#e2e8f0").grid(row=0, column=2, padx=10, pady=5, sticky="w")
+        
+        mercados_lista = ["Todos los mercados"] + list(self.mercados_dict.values())
+        combo_mercado = ttk.Combobox(frame_seleccion,
+            values=mercados_lista,
+            state="readonly",
+            font=("Arial", 10),
+            width=30)
+        combo_mercado.current(0)
+        combo_mercado.grid(row=0, column=3, padx=10, pady=5)
+        
+        # Tipo de ciclo
+        tk.Label(frame_seleccion,
+            text="Ciclo a analizar:",
+            font=("Arial", 10, "bold"),
+            bg="#1e293b", fg="#e2e8f0").grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        
+        combo_ciclo = ttk.Combobox(frame_seleccion,
+            values=["Semanal (7 días)", "Quincenal (15 días)", "Mensual (30 días)"],
+            state="readonly",
+            font=("Arial", 10),
+            width=25)
+        combo_ciclo.current(0)
+        combo_ciclo.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+        
+        tk.Label(frame_seleccion,
+            text="(Patrón que se repite cada N días)",
+            font=("Arial", 8, "italic"),
+            bg="#1e293b", fg="#64748b").grid(row=1, column=2, columnspan=2, sticky="w")
+        
+        # Días a predecir
+        tk.Label(frame_seleccion,
+            text="Días a predecir:",
+            font=("Arial", 10, "bold"),
+            bg="#1e293b", fg="#e2e8f0").grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        
+        spin_dias = tk.Spinbox(frame_seleccion,
+            from_=1, to=90,
+            font=("Arial", 10),
+            width=10,
+            bg="#0f172a", fg="white")
+        spin_dias.delete(0, tk.END)
+        spin_dias.insert(0, "30")
+        spin_dias.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+        
+        # Explicación
+        frame_info = tk.Frame(ventana, bg="#1a1f2e")
+        frame_info.pack(fill=tk.X, padx=20, pady=(0, 10))
+        
+        tk.Label(frame_info,
+            text="💡 ¿Qué es el Análisis Estacional?",
+            font=("Arial", 9, "bold"),
+            bg="#1a1f2e", fg="#8b5cf6").pack(anchor="w", padx=10, pady=5)
+        
+        info_text = """    Este modelo busca patrones repetitivos en los precios:
+    • Semanal: ¿Los lunes son más caros? ¿Los domingos más baratos?
+    • Quincenal: ¿Sube a mitad de mes cuando la gente cobra?
+    • Mensual: ¿Ciclos relacionados con cosechas o temporadas?
+    
+    La predicción se basa en promedios de cada día del ciclo."""
+        
+        tk.Label(frame_info,
+            text=info_text,
+            font=("Arial", 8),
+            bg="#1a1f2e", fg="#94a3b8",
+            justify=tk.LEFT).pack(anchor="w", padx=20)
+        
+        # Frame de resultados
+        frame_resultados = tk.Frame(ventana, bg="#1e293b", height=320)
+        frame_resultados.pack(fill=tk.BOTH, padx=20, pady=10)
+        frame_resultados.pack_propagate(False)
+        
+        # Canvas para gráfico
+        canvas_grafico = tk.Canvas(frame_resultados,
+            bg="#0f172a",
+            highlightthickness=0,
+            height=180)
+        canvas_grafico.pack(fill=tk.BOTH, padx=10, pady=(10, 5))
+        
+        # Text widget para resultados
+        frame_texto = tk.Frame(frame_resultados, bg="#1e293b")
+        frame_texto.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        scrollbar = tk.Scrollbar(frame_texto)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        text_resultado = tk.Text(frame_texto,
+            font=("Courier", 9),
+            bg="#1e293b", fg="#94a3b8",
+            wrap=tk.WORD,
+            height=6,
+            yscrollcommand=scrollbar.set)
+        text_resultado.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.config(command=text_resultado.yview)
+        
+        text_resultado.insert("1.0", "Selecciona un producto y presiona 'Analizar Estacionalidad'")
+        
+        def calcular_estacional():
+            """Calcula la predicción estacional"""
+            if not combo_producto.get():
+                messagebox.showwarning("Advertencia", "Selecciona un producto")
+                return
+            
+            id_producto = self.get_id_from_combo(combo_producto, self.productos_dict)
+            dias_futuro = int(spin_dias.get())
+            
+            # Determinar longitud del ciclo
+            ciclo_texto = combo_ciclo.get()
+            if "Semanal" in ciclo_texto:
+                longitud_ciclo = 7
+                nombre_ciclo = "Semanal"
+                dias_nombres = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+            elif "Quincenal" in ciclo_texto:
+                longitud_ciclo = 15
+                nombre_ciclo = "Quincenal"
+                dias_nombres = [f"Día {i+1}" for i in range(15)]
+            else:  # Mensual
+                longitud_ciclo = 30
+                nombre_ciclo = "Mensual"
+                dias_nombres = [f"Día {i+1}" for i in range(30)]
+            
+            # Obtener datos históricos
+            if combo_mercado.get() == "Todos los mercados":
+                query = """
+                WITH todos_precios AS (
+                    SELECT 
+                        h.fecha_registro::timestamp as fecha_completa,
+                        NULLIF(
+                            REGEXP_REPLACE(
+                                SUBSTRING(h.observaciones FROM 'a ([0-9]+\\.?[0-9]*) Bs'),
+                                '[^0-9.]', '', 'g'
+                            ),
+                            ''
+                        )::DECIMAL(10,2) as precio_nuevo,
+                        NULLIF(
+                            REGEXP_REPLACE(
+                                SUBSTRING(h.observaciones FROM 'de ([0-9]+\\.?[0-9]*) a'),
+                                '[^0-9.]', '', 'g'
+                            ),
+                            ''
+                        )::DECIMAL(10,2) as precio_viejo
+                    FROM historial_p h
+                    WHERE h.id_producto = %s
+                      AND h.fecha_registro >= CURRENT_DATE - INTERVAL '90 days'
+                      AND h.observaciones IS NOT NULL
+                ),
+                precios_expandidos AS (
+                    SELECT fecha_completa, precio_viejo as precio
+                    FROM todos_precios
+                    WHERE precio_viejo IS NOT NULL
+                    
+                    UNION ALL
+                    
+                    SELECT fecha_completa, precio_nuevo as precio
+                    FROM todos_precios
+                    WHERE precio_nuevo IS NOT NULL
+                    
+                    UNION ALL
+                    
+                    SELECT 
+                        o.fecha_actualizacion,
+                        o.precio
+                    FROM oferta o
+                    WHERE o.id_producto = %s
+                )
+                SELECT 
+                    fecha_completa::date as fecha,
+                    precio
+                FROM precios_expandidos
+                WHERE precio > 0
+                ORDER BY fecha_completa;
+                """
+                params = (id_producto, id_producto)
+            else:
+                id_mercado = self.get_id_from_combo(combo_mercado, self.mercados_dict)
+                query = """
+                WITH todos_precios AS (
+                    SELECT 
+                        h.fecha_registro::timestamp as fecha_completa,
+                        NULLIF(
+                            REGEXP_REPLACE(
+                                SUBSTRING(h.observaciones FROM 'a ([0-9]+\\.?[0-9]*) Bs'),
+                                '[^0-9.]', '', 'g'
+                            ),
+                            ''
+                        )::DECIMAL(10,2) as precio_nuevo,
+                        NULLIF(
+                            REGEXP_REPLACE(
+                                SUBSTRING(h.observaciones FROM 'de ([0-9]+\\.?[0-9]*) a'),
+                                '[^0-9.]', '', 'g'
+                            ),
+                            ''
+                        )::DECIMAL(10,2) as precio_viejo,
+                        h.observaciones
+                    FROM historial_p h
+                    WHERE h.id_producto = %s
+                      AND h.fecha_registro >= CURRENT_DATE - INTERVAL '90 days'
+                      AND h.observaciones IS NOT NULL
+                ),
+                precios_mercado AS (
+                    SELECT 
+                        fecha_completa,
+                        precio_viejo as precio
+                    FROM todos_precios tp
+                    INNER JOIN mercado m ON tp.observaciones LIKE '%%' || m.nombre_mercado || '%%'
+                    WHERE m.id_mercado = %s AND precio_viejo IS NOT NULL
+                    
+                    UNION ALL
+                    
+                    SELECT 
+                        fecha_completa,
+                        precio_nuevo as precio
+                    FROM todos_precios tp
+                    INNER JOIN mercado m ON tp.observaciones LIKE '%%' || m.nombre_mercado || '%%'
+                    WHERE m.id_mercado = %s AND precio_nuevo IS NOT NULL
+                    
+                    UNION ALL
+                    
+                    SELECT 
+                        o.fecha_actualizacion,
+                        o.precio
+                    FROM oferta o
+                    WHERE o.id_producto = %s
+                      AND o.id_mercado = %s
+                )
+                SELECT 
+                    fecha_completa::date as fecha,
+                    precio
+                FROM precios_mercado
+                WHERE precio > 0
+                ORDER BY fecha_completa;
+                """
+                params = (id_producto, id_mercado, id_mercado, id_producto, id_mercado)
+            
+            datos = execute_query(query, params, fetch=True)
+            
+            if not datos or len(datos) < longitud_ciclo:
+                messagebox.showwarning("Datos insuficientes",
+                    f"Se necesitan al menos {longitud_ciclo} registros para análisis {nombre_ciclo.lower()}.\n\n"
+                    f"Registros encontrados: {len(datos) if datos else 0}")
+                return
+            
+            # Calcular promedio por posición en el ciclo
+            from collections import defaultdict
+            promedios_ciclo = defaultdict(list)
+            
+            for i, dato in enumerate(datos):
+                posicion_ciclo = i % longitud_ciclo
+                precio = float(dato[1])
+                promedios_ciclo[posicion_ciclo].append(precio)
+            
+            # Calcular promedio de cada posición
+            patron_estacional = {}
+            for pos in range(longitud_ciclo):
+                if pos in promedios_ciclo and promedios_ciclo[pos]:
+                    patron_estacional[pos] = sum(promedios_ciclo[pos]) / len(promedios_ciclo[pos])
+                else:
+                    # Si no hay datos para esa posición, usar el promedio general
+                    todos_precios = [float(d[1]) for d in datos]
+                    patron_estacional[pos] = sum(todos_precios) / len(todos_precios)
+            
+            # Precio actual
+            precio_actual = float(datos[-1][1])
+            fecha_actual = datos[-1][0]
+            posicion_actual = (len(datos) - 1) % longitud_ciclo
+            
+            # Predecir para días futuros
+            fecha_futura = fecha_actual + timedelta(days=dias_futuro)
+            posicion_futura = (len(datos) + dias_futuro - 1) % longitud_ciclo
+            precio_predicho = patron_estacional[posicion_futura]
+            
+            # Calcular variabilidad del patrón
+            varianzas = []
+            for pos in range(longitud_ciclo):
+                if pos in promedios_ciclo and len(promedios_ciclo[pos]) > 1:
+                    prom = patron_estacional[pos]
+                    var = sum((p - prom) ** 2 for p in promedios_ciclo[pos]) / len(promedios_ciclo[pos])
+                    varianzas.append(math.sqrt(var))
+            
+            variabilidad = sum(varianzas) / len(varianzas) if varianzas else 1.0
+            
+            # Determinar si el patrón es fuerte
+            precios_todos = [float(d[1]) for d in datos]
+            rango_precios = max(precios_todos) - min(precios_todos)
+            rango_patron = max(patron_estacional.values()) - min(patron_estacional.values())
+            
+            fuerza_patron = (rango_patron / rango_precios * 100) if rango_precios > 0 else 0
+            
+            if fuerza_patron > 15:
+                interpretacion = "PATRÓN FUERTE detectado"
+                color_patron = "#10b981"
+                confianza = "Alta"
+            elif fuerza_patron > 5:
+                interpretacion = "PATRÓN MODERADO detectado"
+                color_patron = "#f59e0b"
+                confianza = "Media"
+            else:
+                interpretacion = "PATRÓN DÉBIL o inexistente"
+                color_patron = "#dc2626"
+                confianza = "Baja"
+            
+            # Encontrar día más caro y más barato del ciclo
+            pos_max = max(patron_estacional, key=patron_estacional.get)
+            pos_min = min(patron_estacional, key=patron_estacional.get)
+            
+            # Determinar tendencia
+            if precio_predicho > precio_actual * 1.02:
+                tendencia = "ALCISTA 📈"
+            elif precio_predicho < precio_actual * 0.98:
+                tendencia = "BAJISTA 📉"
+            else:
+                tendencia = "ESTABLE ➡️"
+            
+            # Mostrar resultados
+            resultado_texto = f"""
+🔄 RESULTADOS - ANÁLISIS ESTACIONAL {nombre_ciclo.upper()}
+
+Producto: {combo_producto.get()}
+Mercado: {combo_mercado.get()}
+Tipo de ciclo: {nombre_ciclo} ({longitud_ciclo} días)
+Datos históricos: {len(datos)} registros
+
+════════════════════════════════════════════════
+
+📊 PATRÓN DETECTADO
+   {interpretacion}
+   Fuerza del patrón: {fuerza_patron:.1f}%
+   Variabilidad: ±{variabilidad:.2f} Bs
+   Nivel de confianza: {confianza}
+
+📍 SITUACIÓN ACTUAL
+   Precio actual: {precio_actual:.2f} Bs
+   Fecha: {fecha_actual.strftime('%d/%m/%Y')}
+   Posición en el ciclo: {dias_nombres[posicion_actual] if posicion_actual < len(dias_nombres) else f"Día {posicion_actual+1}"}
+   Precio esperado hoy: {patron_estacional[posicion_actual]:.2f} Bs
+   Desviación: {(precio_actual - patron_estacional[posicion_actual]):.2f} Bs
+
+🔮 PREDICCIÓN PARA {dias_futuro} DÍAS
+   Precio estimado: {precio_predicho:.2f} Bs
+   Fecha proyectada: {fecha_futura.strftime('%d/%m/%Y')}
+   Posición en el ciclo: {dias_nombres[posicion_futura] if posicion_futura < len(dias_nombres) else f"Día {posicion_futura+1}"}
+   
+   Rango probable: {precio_predicho - variabilidad:.2f} - {precio_predicho + variabilidad:.2f} Bs
+   
+   Tendencia: {tendencia}
+   Cambio esperado: {(precio_predicho - precio_actual):.2f} Bs ({((precio_predicho - precio_actual) / precio_actual * 100):.1f}%)
+
+════════════════════════════════════════════════
+
+📈 ANÁLISIS DEL PATRÓN {nombre_ciclo.upper()}
+
+   Día MÁS CARO del ciclo:
+   • {dias_nombres[pos_max] if pos_max < len(dias_nombres) else f"Día {pos_max+1}"}: {patron_estacional[pos_max]:.2f} Bs (promedio)
+   
+   Día MÁS BARATO del ciclo:
+   • {dias_nombres[pos_min] if pos_min < len(dias_nombres) else f"Día {pos_min+1}"}: {patron_estacional[pos_min]:.2f} Bs (promedio)
+   
+   Diferencia máxima: {(patron_estacional[pos_max] - patron_estacional[pos_min]):.2f} Bs
+
+════════════════════════════════════════════════
+
+⚙️ INFORMACIÓN TÉCNICA
+   Modelo: Descomposición Estacional Simple
+   Método: Promedio por posición en el ciclo
+   
+   Precio min histórico: {min(precios_todos):.2f} Bs
+   Precio max histórico: {max(precios_todos):.2f} Bs
+   Promedio general: {sum(precios_todos)/len(precios_todos):.2f} Bs
+
+💡 INTERPRETACIÓN:
+   {"Este producto muestra un patrón claro que se repite" if fuerza_patron > 15 else "El patrón es débil, los precios varían más por" if fuerza_patron > 5 else "No hay patrón estacional significativo. Los precios"}
+   {"cada " + nombre_ciclo.lower() + ". Usa este patrón para planificar" if fuerza_patron > 15 else "otros factores que por el ciclo " + nombre_ciclo.lower() + "." if fuerza_patron > 5 else "parecen variar por razones no cíclicas."}
+   {"compras en días baratos y ventas en días caros." if fuerza_patron > 15 else "Considera otros modelos de predicción." if fuerza_patron > 5 else ""}
+            """
+            
+            text_resultado.delete("1.0", tk.END)
+            text_resultado.insert("1.0", resultado_texto)
+            text_resultado.config(fg="#e2e8f0")
+            
+            # Dibujar gráfico
+            canvas_grafico.delete("all")
+            self.dibujar_grafico_estacional(canvas_grafico, datos, patron_estacional, 
+                                           longitud_ciclo, dias_nombres, precio_predicho, 
+                                           posicion_futura, dias_futuro)
+        
+        # Botones
+        frame_botones = tk.Frame(ventana, bg="#0a0f1e")
+        frame_botones.pack(pady=10)
+        
+        tk.Button(frame_botones,
+            text="🔄 Analizar Estacionalidad",
+            font=("Arial", 11, "bold"),
+            bg="#8b5cf6", fg="white",
+            command=calcular_estacional,
+            padx=20, pady=8).pack(side=tk.LEFT, padx=5)
+        
+        tk.Button(frame_botones,
+            text="Cerrar",
+            font=("Arial", 10),
+            bg="#475569", fg="white",
+            command=ventana.destroy,
+            padx=20, pady=8).pack(side=tk.LEFT, padx=5)
+    
+    def dibujar_grafico_estacional(self, canvas, datos, patron, longitud_ciclo, nombres_dias, precio_pred, pos_pred, dias_futuro):
+        """Dibuja gráfico del patrón estacional"""
+        width = canvas.winfo_width() if canvas.winfo_width() > 1 else 800
+        height = canvas.winfo_height() if canvas.winfo_height() > 1 else 180
+        
+        if width <= 1:
+            width = 800
+        if height <= 1:
+            height = 180
+        
+        margin = 50
+        graph_width = width - 2 * margin
+        graph_height = height - 2 * margin
+        
+        # Fondo
+        canvas.create_rectangle(margin, margin, width-margin, height-margin,
+            fill="#1a1f2e", outline="#334155")
+        
+        # Rango de precios
+        precios_patron = list(patron.values())
+        precios_patron.append(precio_pred)
+        
+        precio_min = min(precios_patron) * 0.95
+        precio_max = max(precios_patron) * 1.05
+        rango_precio = precio_max - precio_min
+        
+        # Ejes
+        canvas.create_line(margin, height-margin, width-margin, height-margin,
+            fill="#64748b", width=2)
+        canvas.create_line(margin, margin, margin, height-margin,
+            fill="#64748b", width=2)
+        
+        # Labels
+        canvas.create_text(width/2, height-15,
+            text="Posición en el ciclo", font=("Arial", 9), fill="#94a3b8")
+        canvas.create_text(15, height/2,
+            text="Precio", font=("Arial", 9), fill="#94a3b8", angle=90)
+        
+        # Título
+        canvas.create_text(width/2, margin-25,
+            text=f"Patrón Estacional (Ciclo: {longitud_ciclo} días)",
+            font=("Arial", 10, "bold"),
+            fill="#8b5cf6")
+        
+        # Dibujar patrón estacional
+        puntos_patron = []
+        for pos in range(longitud_ciclo):
+            x = margin + (pos / longitud_ciclo) * graph_width
+            precio = patron[pos]
+            y = height - margin - ((precio - precio_min) / rango_precio) * graph_height
+            puntos_patron.append((x, y))
+            
+            # Punto morado
+            canvas.create_oval(x-3, y-3, x+3, y+3, fill="#8b5cf6", outline="")
+        
+        # Línea del patrón
+        if len(puntos_patron) > 1:
+            for i in range(len(puntos_patron)):
+                inicio = puntos_patron[i]
+                fin = puntos_patron[(i+1) % longitud_ciclo]
+                canvas.create_line(inicio, fin, fill="#8b5cf6", width=2)
+        
+        # Marcar posición de predicción
+        x_pred = margin + (pos_pred / longitud_ciclo) * graph_width
+        y_pred = height - margin - ((precio_pred - precio_min) / rango_precio) * graph_height
+        
+        # Círculo grande para predicción
+        canvas.create_oval(x_pred-6, y_pred-6, x_pred+6, y_pred+6,
+            fill="#10b981", outline="#064e3b", width=2)
+        
+        canvas.create_text(x_pred, y_pred-15,
+            text=f"{precio_pred:.2f} Bs",
+            font=("Arial", 8, "bold"),
+            fill="#10b981")
+        
+        # Marcar picos (máx y mín)
+        pos_max = max(patron, key=patron.get)
+        pos_min = min(patron, key=patron.get)
+        
+        x_max = margin + (pos_max / longitud_ciclo) * graph_width
+        y_max = height - margin - ((patron[pos_max] - precio_min) / rango_precio) * graph_height
+        
+        x_min = margin + (pos_min / longitud_ciclo) * graph_width
+        y_min = height - margin - ((patron[pos_min] - precio_min) / rango_precio) * graph_height
+        
+        # Etiquetas para máx/mín
+        canvas.create_text(x_max, y_max+15,
+            text="↑ MÁX",
+            font=("Arial", 7, "bold"),
+            fill="#dc2626")
+        
+        canvas.create_text(x_min, y_min-15,
+            text="↓ MÍN",
+            font=("Arial", 7, "bold"),
+            fill="#10b981")
+        
+        # Leyenda
+        legend_x = width - margin - 90
+        legend_y = margin + 10
+        
+        canvas.create_rectangle(legend_x-5, legend_y-8, legend_x+85, legend_y+30,
+            fill="#1a1f2e", outline="#334155")
+        
+        canvas.create_oval(legend_x, legend_y-2, legend_x+6, legend_y+4,
+            fill="#8b5cf6", outline="")
+        canvas.create_text(legend_x+15, legend_y,
+            text="Patrón", font=("Arial", 8), fill="#e2e8f0", anchor="w")
+        
+        canvas.create_oval(legend_x-1, legend_y+13, legend_x+7, legend_y+21,
+            fill="#10b981", outline="#064e3b", width=1)
+        canvas.create_text(legend_x+15, legend_y+17,
+            text="Predicción", font=("Arial", 8), fill="#e2e8f0", anchor="w")
+    
     def prediccion_exponencial(self):
         """Predicción con suavizado exponencial simple"""
         # Crear ventana
@@ -1701,14 +2258,7 @@ Datos históricos: {len(datos)} registros
             fill="#10b981", width=2, dash=(5, 5))
         canvas.create_text(legend_x+20, legend_y+30,
             text="Predicción", font=("Arial", 8), fill="#e2e8f0", anchor="w")
-    
-    def prediccion_estacional(self):
-        """Análisis de patrones estacionales"""
-        messagebox.showinfo("En desarrollo",
-            "🔄 Análisis Estacional\n\n"
-            "Este modelo detectará patrones que se repiten\n"
-            "en ciclos (semanales, mensuales, etc.).\n\n"
-            "Próximamente disponible...")
+        
     
     def comparar_modelos(self):
         """Compara diferentes modelos de predicción"""
