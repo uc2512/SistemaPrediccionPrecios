@@ -74,183 +74,165 @@ class SistemaMercado:
         self.logo_izquierdo = self.cargar_logo("logo_izquierdo.png", 100, 100)
         self.logo_derecho = self.cargar_logo("logo_derecho.png", 100, 100)
         
-        # Insertar logo izquierdo con efecto de brillo
+        # Insertar logo izquierdo más discreto
         if self.logo_izquierdo:
-            self.canvas.create_oval(10, 0, 110, 100, fill="#1e293b", outline="")
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
-        else:
-            self.canvas.create_oval(10, 0, 110, 100, fill="#1e293b", outline="#3b82f6", width=2)
-            self.canvas.create_text(60, 50, text="LOGO\nUAB", font=("Arial", 12, "bold"), fill="#64748b")
         
-        # Insertar logo derecho con efecto de brillo
+        # Insertar logo derecho más discreto
         if self.logo_derecho:
-            self.canvas.create_oval(790, 0, 890, 100, fill="#1e293b", outline="")
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
-        else:
-            self.canvas.create_oval(790, 0, 890, 100, fill="#1e293b", outline="#3b82f6", width=2)
-            self.canvas.create_text(840, 50, text="LOGO\nSIS", font=("Arial", 12, "bold"), fill="#64748b")
         
-        # Elementos decorativos de fondo mejorados
-        self.crear_elementos_decorativos()
-        
-        # Header con mejor espaciado
-        self.canvas.create_text(450, 105, 
+        # Header simplificado
+        self.canvas.create_text(450, 100, 
                                text="UNIVERSIDAD AUTÓNOMA DEL BENI", 
-                               font=("Arial", 15, "bold"), 
+                               font=("Arial", 13), 
                                fill="#64748b")
         
-        self.canvas.create_text(450, 130, 
-                               text='"JOSÉ BALLIVIÁN"', 
-                               font=("Arial", 13), 
+        self.canvas.create_text(450, 120, 
+                               text='"José Ballivián"', 
+                               font=("Arial", 11), 
                                fill="#94a3b8")
         
-        # Línea decorativa sutil
-        self.canvas.create_line(250, 150, 650, 150, fill="#334155", width=1)
-        
-        # Título principal con gradiente visual simulado
-        self.canvas.create_text(450, 190, 
+        # Título principal más espaciado y moderno
+        self.canvas.create_text(450, 185, 
                                text="Sistema de Análisis y", 
-                               font=("Arial", 30, "bold"), 
+                               font=("Arial", 28), 
                                fill="#e2e8f0")
         
-        self.canvas.create_text(450, 230, 
+        self.canvas.create_text(450, 220, 
                                text="Predicción de Precios del Mercado", 
-                               font=("Arial", 30, "bold"), 
+                               font=("Arial", 28, "bold"), 
                                fill="#3b82f6")
         
-        # Subtítulo mejorado
-        self.canvas.create_text(450, 275, 
+        # Subtítulo con mejor espaciado
+        self.canvas.create_text(450, 265, 
                                text="Herramienta integral para el análisis de datos históricos", 
-                               font=("Arial", 13), 
+                               font=("Arial", 11), 
                                fill="#94a3b8")
         
-        self.canvas.create_text(450, 297, 
-                               text="y proyección inteligente de precios en el mercado boliviano", 
-                               font=("Arial", 13), 
+        self.canvas.create_text(450, 285, 
+                               text="y proyección inteligente de precios de mercado en Bolivia", 
+                               font=("Arial", 11), 
                                fill="#94a3b8")
         
-        # Iconos informativos con tarjetas mejoradas
-        info_y = 360
-        # Tarjeta 1
-        self.canvas.create_rectangle(120, info_y-30, 280, info_y+35, 
-                                     fill="#1e293b", outline="#10b981", width=2)
-        self.canvas.create_text(200, info_y-10, 
+        # Tarjetas de características más pequeñas y espaciadas
+        info_y = 350
+        
+        # Tarjeta 1 - Análisis Estadístico
+        self.canvas.create_rectangle(145, info_y-25, 275, info_y+30, 
+                                     fill="#0f1419", outline="#10b981", width=1,
+                                     tags="card1")
+        self.canvas.create_text(210, info_y-8, 
                                text="📈", 
-                               font=("Arial", 24), 
-                               fill="#10b981")
-        self.canvas.create_text(200, info_y+15, 
+                               font=("Arial", 20))
+        self.canvas.create_text(210, info_y+13, 
                                text="Análisis Estadístico", 
-                               font=("Arial", 10, "bold"), 
+                               font=("Arial", 9, "bold"), 
                                fill="#e2e8f0")
         
-        # Tarjeta 2
-        self.canvas.create_rectangle(370, info_y-30, 530, info_y+35, 
-                                     fill="#1e293b", outline="#8b5cf6", width=2)
-        self.canvas.create_text(450, info_y-10, 
+        # Tarjeta 2 - Base de Datos (corregida)
+        self.canvas.create_rectangle(320, info_y-25, 580, info_y+30, 
+                                     fill="#0f1419", outline="#8b5cf6", width=1,
+                                     tags="card2")
+        self.canvas.create_text(450, info_y-8, 
                                text="🗄️", 
-                               font=("Arial", 24), 
-                               fill="#8b5cf6")
-        self.canvas.create_text(450, info_y+15, 
+                               font=("Arial", 20))
+        self.canvas.create_text(450, info_y+13, 
                                text="Base de Datos PostgreSQL", 
-                               font=("Arial", 10, "bold"), 
+                               font=("Arial", 9, "bold"), 
                                fill="#e2e8f0")
         
-        # Tarjeta 3
-        self.canvas.create_rectangle(620, info_y-30, 780, info_y+35, 
-                                     fill="#1e293b", outline="#f59e0b", width=2)
-        self.canvas.create_text(700, info_y-10, 
+        # Tarjeta 3 - Predicción Inteligente
+        self.canvas.create_rectangle(625, info_y-25, 755, info_y+30, 
+                                     fill="#0f1419", outline="#f59e0b", width=1,
+                                     tags="card3")
+        self.canvas.create_text(690, info_y-8, 
                                text="🔮", 
-                               font=("Arial", 24), 
-                               fill="#f59e0b")
-        self.canvas.create_text(700, info_y+15, 
+                               font=("Arial", 20))
+        self.canvas.create_text(690, info_y+13, 
                                text="Predicción Inteligente", 
-                               font=("Arial", 10, "bold"), 
+                               font=("Arial", 9, "bold"), 
                                fill="#e2e8f0")
         
-        # Botón de inicio mejorado
+        # Efectos hover para tarjetas
+        self.canvas.tag_bind("card1", "<Enter>", lambda e: self.hover_card(145, info_y-25, 275, info_y+30, "#10b981"))
+        self.canvas.tag_bind("card1", "<Leave>", lambda e: self.leave_card(145, info_y-25, 275, info_y+30, "#10b981"))
+        
+        self.canvas.tag_bind("card2", "<Enter>", lambda e: self.hover_card(320, info_y-25, 580, info_y+30, "#8b5cf6"))
+        self.canvas.tag_bind("card2", "<Leave>", lambda e: self.leave_card(320, info_y-25, 580, info_y+30, "#8b5cf6"))
+        
+        self.canvas.tag_bind("card3", "<Enter>", lambda e: self.hover_card(625, info_y-25, 755, info_y+30, "#f59e0b"))
+        self.canvas.tag_bind("card3", "<Leave>", lambda e: self.leave_card(625, info_y-25, 755, info_y+30, "#f59e0b"))
+        
+        # Botón de inicio moderno y animado
         self.btn_inicio = tk.Button(
             self.frame_principal,
             text="🚀  INICIAR SISTEMA",
-            font=("Arial", 15, "bold"),
+            font=("Arial", 14, "bold"),
             bg="#3b82f6",
             fg="white",
             activebackground="#2563eb",
             activeforeground="white",
             relief=tk.FLAT,
             cursor="hand2",
-            padx=50,
-            pady=18,
+            padx=45,
+            pady=15,
             borderwidth=0,
             command=self.iniciar_sistema
         )
-        self.btn_inicio.place(x=450, y=450, anchor="center")
+        self.btn_inicio.place(x=450, y=430, anchor="center")
         
         # Efecto hover para el botón
         self.btn_inicio.bind("<Enter>", self.hover_enter)
         self.btn_inicio.bind("<Leave>", self.hover_leave)
         
-        # Sección de equipo rediseñada
-        self.canvas.create_text(450, 500, 
-                               text="EQUIPO DE DESARROLLO", 
-                               font=("Arial", 10, "bold"), 
+        # Sección de equipo más limpia
+        self.canvas.create_text(450, 490, 
+                               text="INTEGRANTES", 
+                               font=("Arial", 9, "bold"), 
                                fill="#64748b")
         
-        # Fondo elegante para nombres
-        self.canvas.create_rectangle(50, 518, 850, 575, 
-                                     fill="#1a1f2e", outline="#334155", width=1)
+        # Nombres en formato más compacto
+        nombres_linea1 = "Jhon Ever García Quispe  •  Uriel David Ribera Choque  •  Aldo Andrés Arandia Vásquez"
+        nombres_linea2 = "José Raul Melgar Guagama  •  Yaimara Jissel Gil Inchu"
         
-        # Grid de nombres más organizado (3 columnas)
-        col1_x, col2_x, col3_x = 180, 450, 720
-        row1_y, row2_y = 535, 560
+        self.canvas.create_text(450, 515, text=nombres_linea1, 
+                               font=("Arial", 8), fill="#94a3b8", anchor="center")
+        self.canvas.create_text(450, 535, text=nombres_linea2, 
+                               font=("Arial", 8), fill="#94a3b8", anchor="center")
         
-        nombres = [
-            "Jhon Ever García Quispe",
-            "Uriel David Ribera Choque",
-            "Aldo Andrés Arandia Vásquez",
-            "José Raul Melgar Guagama",
-            "Yaimara Jissel Gil Inchu"
-        ]
-        
-        self.canvas.create_text(col1_x, row1_y, text=f"• {nombres[0]}", 
-                               font=("Arial", 9), fill="#e2e8f0", anchor="center")
-        self.canvas.create_text(col2_x, row1_y, text=f"• {nombres[1]}", 
-                               font=("Arial", 9), fill="#e2e8f0", anchor="center")
-        self.canvas.create_text(col3_x, row1_y, text=f"• {nombres[2]}", 
-                               font=("Arial", 9), fill="#e2e8f0", anchor="center")
-        self.canvas.create_text(col1_x, row2_y, text=f"• {nombres[3]}", 
-                               font=("Arial", 9), fill="#e2e8f0", anchor="center")
-        self.canvas.create_text(col2_x, row2_y, text=f"• {nombres[4]}", 
-                               font=("Arial", 9), fill="#e2e8f0", anchor="center")
-        
-        # Copyright
-        self.canvas.create_text(450, 590, 
+        # Copyright más discreto
+        self.canvas.create_text(450, 575, 
                                text="© 2025 - Ingeniería de Sistemas UAB | v1.0 Beta", 
                                font=("Arial", 8), 
                                fill="#475569")
+        
+        # Animación sutil de entrada
+        self.animar_entrada()
     
-    def crear_elementos_decorativos(self):
-        # Círculos decorativos más sutiles
-        self.canvas.create_oval(-30, 120, 180, 330, 
-                               outline="#1e3a8a", width=1, dash=(8, 4))
-        self.canvas.create_oval(720, 420, 930, 630, 
-                               outline="#1e3a8a", width=1, dash=(8, 4))
-        
-        # Líneas decorativas más elegantes
-        self.canvas.create_line(100, 165, 800, 165, 
-                               fill="#1e40af", width=1, dash=(10, 5))
-        self.canvas.create_line(100, 318, 800, 318, 
-                               fill="#1e40af", width=1, dash=(10, 5))
-        
-        # Puntos decorativos pequeños
-        for x in range(150, 750, 100):
-            self.canvas.create_oval(x-2, 163, x+2, 167, fill="#3b82f6", outline="")
-            self.canvas.create_oval(x-2, 316, x+2, 320, fill="#3b82f6", outline="")
+    def hover_card(self, x1, y1, x2, y2, color):
+        """Efecto hover suave en las tarjetas"""
+        items = self.canvas.find_overlapping(x1, y1, x2, y2)
+        for item in items:
+            if self.canvas.type(item) == "rectangle":
+                self.canvas.itemconfig(item, fill="#1e293b", width=2)
+    
+    def leave_card(self, x1, y1, x2, y2, color):
+        """Revertir efecto hover"""
+        items = self.canvas.find_overlapping(x1, y1, x2, y2)
+        for item in items:
+            if self.canvas.type(item) == "rectangle":
+                self.canvas.itemconfig(item, fill="#0f1419", width=1)
+    
+    def animar_entrada(self):
+        """Animación sutil de aparición"""
+        pass  # Opcional: puedes agregar fade-in aquí
     
     def hover_enter(self, event):
-        self.btn_inicio.config(bg="#2563eb", padx=55, pady=20)
+        self.btn_inicio.config(bg="#2563eb", padx=50, pady=17)
     
     def hover_leave(self, event):
-        self.btn_inicio.config(bg="#3b82f6", padx=50, pady=18)
+        self.btn_inicio.config(bg="#3b82f6", padx=45, pady=15)
     
     def iniciar_sistema(self):
         self.btn_inicio.place_forget()
@@ -261,10 +243,8 @@ class SistemaMercado:
         
         # Recrear logos
         if self.logo_izquierdo:
-            self.canvas.create_oval(10, 0, 110, 100, fill="#1e293b", outline="")
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
         if self.logo_derecho:
-            self.canvas.create_oval(790, 0, 890, 100, fill="#1e293b", outline="")
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
         
         # Título de carga
@@ -351,10 +331,8 @@ class SistemaMercado:
         
         # Recrear logos
         if self.logo_izquierdo:
-            self.canvas.create_oval(10, 0, 110, 100, fill="#1e293b", outline="")
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
         if self.logo_derecho:
-            self.canvas.create_oval(790, 0, 890, 100, fill="#1e293b", outline="")
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
         
         # Header
@@ -377,39 +355,33 @@ class SistemaMercado:
                                font=("Arial", 22, "bold"), 
                                fill="#3b82f6")
         
-        # Crear tarjetas mejoradas (2x2)
-        self.crear_tarjeta_modulo(270, 240, "📊", "Gestión de Datos", 
+        # Crear tarjetas mejoradas (2x2) - más arriba
+        self.crear_tarjeta_modulo(270, 220, "📊", "Gestión de Datos", 
                                  "Productos, Precios y Mercados", "#10b981", self.modulo_gestion)
         
-        self.crear_tarjeta_modulo(630, 240, "📈", "Análisis Estadístico", 
+        self.crear_tarjeta_modulo(630, 220, "📈", "Análisis Estadístico", 
                                  "Tendencias y Volatilidad", "#8b5cf6", self.modulo_analisis)
         
-        self.crear_tarjeta_modulo(270, 400, "🔮", "Predicciones", 
+        self.crear_tarjeta_modulo(270, 360, "🔮", "Predicciones", 
                                  "Proyección de Precios", "#f59e0b", self.modulo_prediccion)
         
-        self.crear_tarjeta_modulo(630, 400, "🔍", "Consultas y Reportes", 
+        self.crear_tarjeta_modulo(630, 360, "🔍", "Consultas y Reportes", 
                                  "Búsqueda y Exportación", "#06b6d4", self.modulo_consultas)
         
-        # Botones footer mejorados
-        self.crear_boton_footer(370, 520, "⚙️ Configuración", "#475569", self.modulo_config)
-        self.crear_boton_footer(530, 520, "🚪 Salir", "#dc2626", self.salir_sistema)
+        # Botón Salir centrado
+        self.crear_boton_footer(450, 490, "🚪 Salir", "#dc2626", self.salir_sistema)
         
         # Footer
-        self.canvas.create_text(450, 565, 
+        self.canvas.create_text(450, 545, 
                                text="Sistema Integrado de Análisis de Mercados", 
                                font=("Arial", 9), 
                                fill="#64748b")
-        self.canvas.create_text(450, 585, 
+        self.canvas.create_text(450, 565, 
                                text="v1.0 Beta - © 2025 Ingeniería de Sistemas UAB", 
                                font=("Arial", 8), 
                                fill="#475569")
     
     def crear_tarjeta_modulo(self, x, y, icono, titulo, descripcion, color, comando):
-        
-        # Sombra de tarjeta
-        self.canvas.create_rectangle(x-128, y-38, x+132, y+102, 
-                                     fill="#0a0f1e", outline="",
-                                     tags=f"tarjeta_{x}_{y}")
         
         # Fondo de tarjeta (guardamos ID para hover)
         tarjeta_id = self.canvas.create_rectangle(x-130, y-40, x+130, y+100, 
@@ -440,7 +412,7 @@ class SistemaMercado:
                                fill="#94a3b8",
                                tags=f"tarjeta_{x}_{y}")
         
-        #  EVENTOS DEL CANVAS (no más botones invisibles)
+        # EVENTOS DEL CANVAS (no más botones invisibles)
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Button-1>", lambda e: comando())
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Enter>", 
             lambda e: self.hover_tarjeta_enter(tarjeta_id, color))
@@ -454,11 +426,9 @@ class SistemaMercado:
             lambda e: self.canvas.config(cursor=""), add="+")
     
     def hover_tarjeta_enter(self, tarjeta_id, color):
-        """Efecto hover al entrar"""
         self.canvas.itemconfig(tarjeta_id, fill="#334155", width=3)
     
     def hover_tarjeta_leave(self, tarjeta_id):
-        """Efecto hover al salir"""
         self.canvas.itemconfig(tarjeta_id, fill="#1e293b", width=2)
     
     def crear_boton_footer(self, x, y, texto, color, comando):
@@ -497,10 +467,8 @@ class SistemaMercado:
         
         # Recrear logos
         if self.logo_izquierdo:
-            self.canvas.create_oval(10, 0, 110, 100, fill="#1e293b", outline="")
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
         if self.logo_derecho:
-            self.canvas.create_oval(790, 0, 890, 100, fill="#1e293b", outline="")
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
         
         # Título
@@ -514,7 +482,7 @@ class SistemaMercado:
                                font=("Arial", 12), 
                                fill="#94a3b8")
         
-        # Tarjetas de opciones (también corregidas)
+        # Tarjetas de opciones
         self.crear_tarjeta_modulo(270, 250, "🛒", "Productos", 
                                  "Catálogo de productos", "#10b981", 
                                  self.abrir_gestion_productos)
@@ -543,7 +511,6 @@ class SistemaMercado:
         self.btn_volver.place(x=350, y=530)
 
     def abrir_gestion_productos(self):
-        """Abre el módulo de gestión de productos"""
         for widget in self.frame_principal.winfo_children():
             if widget != self.canvas:
                 widget.destroy()
@@ -555,7 +522,6 @@ class SistemaMercado:
         )
 
     def abrir_gestion_mercados(self):
-        """Abre el módulo de gestión de mercados"""
         for widget in self.frame_principal.winfo_children():
             if widget != self.canvas:
                 widget.destroy()
@@ -567,7 +533,6 @@ class SistemaMercado:
         )
     
     def abrir_gestion_precios(self):
-        """Abre el módulo de gestión de precios"""
         for widget in self.frame_principal.winfo_children():
             if widget != self.canvas:
                 widget.destroy()
@@ -579,7 +544,6 @@ class SistemaMercado:
         )
     
     def abrir_gestion_categorias(self):
-        """Abre el módulo de gestión de categorías"""
         for widget in self.frame_principal.winfo_children():
             if widget != self.canvas:
                 widget.destroy()
@@ -625,24 +589,8 @@ class SistemaMercado:
             self.mostrar_menu_principal
         )
     
-    def modulo_config(self):
-        self.mostrar_mensaje_desarrollo("Configuración", "#475569")
-    
     def salir_sistema(self):
         self.root.quit()
-    
-    def mostrar_mensaje_desarrollo(self, modulo, color):
-        # Crear rectángulo de fondo
-        rect = self.canvas.create_rectangle(250, 130, 650, 180, 
-                                           fill="#1e293b", outline=color, width=2,
-                                           tags="temp_msg")
-        # Texto
-        msg = self.canvas.create_text(450, 155, 
-                                      text=f"✨ Módulo '{modulo}' en desarrollo", 
-                                      font=("Arial", 13, "bold"), 
-                                      fill=color,
-                                      tags="temp_msg")
-        self.root.after(2500, lambda: self.canvas.delete("temp_msg"))
 
 
 if __name__ == "__main__":
