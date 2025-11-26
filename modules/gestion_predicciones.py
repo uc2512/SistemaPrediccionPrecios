@@ -2284,7 +2284,7 @@ Datos históricos: {len(datos)} registros
             "comparado con las predicciones futuras.\n\n"
             "Próximamente disponible...")
     
-    # ========== FUNCIONES AUXILIARES ==========
+    
     
     def get_id_from_combo(self, combo, diccionario):
         """Obtiene el ID a partir del valor seleccionado"""

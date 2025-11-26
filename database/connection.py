@@ -3,7 +3,7 @@ from psycopg2 import pool
 import sys
 
 class DatabaseConnection:
-    """Clase para gestionar la conexión a PostgreSQL"""
+    
     
     _connection_pool = None
     
@@ -17,7 +17,7 @@ class DatabaseConnection:
                 host="localhost",
                 database="mercado_db",
                 user="postgres",
-                password="25250101",  # CAMBIAR ESTO
+                password="25250101",  
                 port="5432"
             )
             print("✓ Pool de conexiones creado exitosamente")

@@ -74,8 +74,8 @@ class AnalisisEstadistico:
             self.crear_boton_volver()
             return
         
-        # Combobox de productos
-        self.canvas.create_text(250, 135, 
+        # Combobox de productos - CENTRADO
+        self.canvas.create_text(310, 135, 
                                text="Producto:", 
                                font=("Arial", 10, "bold"), 
                                fill="#e2e8f0", anchor="e")
@@ -85,9 +85,9 @@ class AnalisisEstadistico:
             values=list(self.productos_dict.values()),
             state="readonly",
             font=("Arial", 10),
-            width=35
+            width=32
         )
-        self.combo_producto.place(x=270, y=125)
+        self.combo_producto.place(x=320, y=125)
         
         # Botón Analizar
         self.btn_analizar = tk.Button(
@@ -97,13 +97,13 @@ class AnalisisEstadistico:
             bg="#8b5cf6", fg="white",
             activebackground="#7c3aed",
             relief=tk.FLAT, cursor="hand2",
-            padx=25, pady=6,
+            padx=20, pady=6,
             command=self.analizar_producto
         )
-        self.btn_analizar.place(x=610, y=125)
+        self.btn_analizar.place(x=600, y=125)
         
         # === SECCIÓN ESTADÍSTICAS PRINCIPALES ===
-        self.canvas.create_rectangle(50, 175, 850, 265, 
+        self.canvas.create_rectangle(50, 175, 850, 270, 
                                      fill="#1e293b", outline="#10b981", width=2)
         
         self.canvas.create_text(450, 190, 
@@ -111,14 +111,18 @@ class AnalisisEstadistico:
                                font=("Arial", 11, "bold"), 
                                fill="#10b981")
         
-        # Tarjetas de estadísticas (4 columnas)
-        card_y = 222
-        card_width = 160
-        card_height = 55
-        spacing = 188
+        # Tarjetas de estadísticas (4 columnas) - MEJOR DISTRIBUIDAS
+        card_y = 225
+        card_width = 155
+        card_height = 50
+        
+        # Calcular posiciones centradas
+        total_width = 4 * card_width + 3 * 25  # 4 tarjetas + 3 espacios
+        start_x = (900 - total_width) / 2 + card_width / 2
+        spacing = card_width + 25
         
         # Tarjeta 1: Precio Actual
-        x1 = 140
+        x1 = start_x
         self.crear_tarjeta_stat(x1, card_y, card_width, card_height, 
                                "💰 Precio Actual", "---", "#3b82f6", "card_actual")
         
@@ -138,15 +142,15 @@ class AnalisisEstadistico:
                                "⬆️ Precio Máximo", "---", "#dc2626", "card_maximo")
         
         # === SECCIÓN GRÁFICOS ===
-        self.canvas.create_rectangle(50, 280, 850, 345, 
+        self.canvas.create_rectangle(50, 285, 850, 350, 
                                      fill="#1e293b", outline="#06b6d4", width=2)
         
-        self.canvas.create_text(450, 295, 
+        self.canvas.create_text(450, 300, 
                                text="VISUALIZACIÓN DE DATOS", 
-                               font=("Arial", 10, "bold"), 
+                               font=("Arial", 11, "bold"), 
                                fill="#06b6d4")
         
-        # Botón para gráfico de evolución
+        # Botón para gráfico de evolución - CENTRADO
         self.btn_grafico_evolucion = tk.Button(
             self.frame_principal,
             text="📈 Ver Evolución de Precios",
@@ -154,74 +158,81 @@ class AnalisisEstadistico:
             bg="#06b6d4", fg="white",
             activebackground="#0891b2",
             relief=tk.FLAT, cursor="hand2",
-            padx=20, pady=8,
-            state=tk.DISABLED,  # Deshabilitado hasta que se analice
+            padx=25, pady=8,
+            state=tk.DISABLED,
             command=self.mostrar_grafico_evolucion
         )
-        self.btn_grafico_evolucion.place(x=330, y=315)
+        self.btn_grafico_evolucion.place(x=345, y=318)
         
-        # === SECCIÓN INFORMACIÓN ADICIONAL (ahora más abajo) ===
-        self.canvas.create_rectangle(50, 360, 850, 510, 
+        # === SECCIÓN INFORMACIÓN ADICIONAL ===
+        self.canvas.create_rectangle(50, 365, 850, 530, 
                                      fill="#1e293b", outline="#f59e0b", width=2)
         
-        self.canvas.create_text(450, 375, 
+        self.canvas.create_text(450, 380, 
                                text="INFORMACIÓN DETALLADA", 
                                font=("Arial", 11, "bold"), 
                                fill="#f59e0b")
         
-        # Área de información
-        info_y = 405
-        info_spacing = 35
+        # Área de información - MEJOR ESPACIADO
+        info_y = 410
+        info_spacing = 26
+        label_x = 100
+        value_x = 250
         
-        self.canvas.create_text(120, info_y, 
+        # Volatilidad
+        self.canvas.create_text(label_x, info_y, 
                                text="📉 Volatilidad:", 
                                font=("Arial", 10, "bold"), 
                                fill="#e2e8f0", anchor="w")
-        self.label_volatilidad = self.canvas.create_text(270, info_y, 
-                               text="Seleccione un producto para analizar", 
-                               font=("Arial", 10), 
+        self.label_volatilidad = self.canvas.create_text(value_x, info_y, 
+                               text="Seleccione un producto", 
+                               font=("Arial", 9), 
                                fill="#94a3b8", anchor="w",
-                               tags="info_volatilidad")
+                               tags="info_volatilidad", width=550)
         
-        self.canvas.create_text(120, info_y + info_spacing, 
+        # Tendencia
+        self.canvas.create_text(label_x, info_y + info_spacing, 
                                text="📈 Tendencia:", 
                                font=("Arial", 10, "bold"), 
                                fill="#e2e8f0", anchor="w")
-        self.label_tendencia = self.canvas.create_text(270, info_y + info_spacing, 
+        self.label_tendencia = self.canvas.create_text(value_x, info_y + info_spacing, 
                                text="---", 
-                               font=("Arial", 10), 
+                               font=("Arial", 9), 
                                fill="#94a3b8", anchor="w",
-                               tags="info_tendencia")
+                               tags="info_tendencia", width=550)
         
-        self.canvas.create_text(120, info_y + info_spacing*2, 
+        # Mercados
+        self.canvas.create_text(label_x, info_y + info_spacing*2, 
                                text="🏪 Mercados:", 
                                font=("Arial", 10, "bold"), 
                                fill="#e2e8f0", anchor="w")
-        self.label_mercados = self.canvas.create_text(270, info_y + info_spacing*2, 
+        self.label_mercados = self.canvas.create_text(value_x, info_y + info_spacing*2, 
                                text="---", 
-                               font=("Arial", 10), 
+                               font=("Arial", 9), 
                                fill="#94a3b8", anchor="w",
-                               tags="info_mercados")
+                               tags="info_mercados", width=550)
         
-        self.canvas.create_text(120, info_y + info_spacing*3, 
-                               text="🕐 Última actualización:", 
+        # Última actualización
+        self.canvas.create_text(label_x, info_y + info_spacing*3, 
+                               text="🕐 Actualización:", 
                                font=("Arial", 10, "bold"), 
                                fill="#e2e8f0", anchor="w")
-        self.label_fecha = self.canvas.create_text(270, info_y + info_spacing*3, 
+        self.label_fecha = self.canvas.create_text(value_x, info_y + info_spacing*3, 
                                text="---", 
-                               font=("Arial", 10), 
+                               font=("Arial", 9), 
                                fill="#94a3b8", anchor="w",
-                               tags="info_fecha")
+                               tags="info_fecha", width=550)
         
-        self.canvas.create_text(120, info_y + info_spacing*4, 
-                               text="💹 Rango de precios:", 
+        # Rango de precios
+        self.canvas.create_text(label_x, info_y + info_spacing*4, 
+                               text="💹 Rango:", 
                                font=("Arial", 10, "bold"), 
                                fill="#e2e8f0", anchor="w")
-        self.label_rango = self.canvas.create_text(270, info_y + info_spacing*4, 
+        self.label_rango = self.canvas.create_text(value_x, info_y + info_spacing*4, 
                                text="---", 
-                               font=("Arial", 10), 
+                               font=("Arial", 9), 
                                fill="#94a3b8", anchor="w",
-                               tags="info_rango")
+                               tags="info_rango", width=550)
         
         # Crear botón volver
         self.crear_boton_volver()
@@ -235,7 +246,7 @@ class AnalisisEstadistico:
                                      tags=f"{tag}_bg")
         
         # Título
-        self.canvas.create_text(x, y - 15, 
+        self.canvas.create_text(x, y - 13, 
                                text=titulo, 
                                font=("Arial", 9, "bold"), 
                                fill=color,
@@ -244,7 +255,7 @@ class AnalisisEstadistico:
         # Valor
         self.canvas.create_text(x, y + 10, 
                                text=valor, 
-                               font=("Arial", 16, "bold"), 
+                               font=("Arial", 15, "bold"), 
                                fill="#e2e8f0",
                                tags=f"{tag}_valor")
     
@@ -279,9 +290,9 @@ class AnalisisEstadistico:
         precios_actuales = [float(fila[0]) for fila in resultados_actuales]
         mercados = [fila[2] for fila in resultados_actuales]
         fecha_reciente = resultados_actuales[0][1]
-        precio_actual = precios_actuales[0]  # El más reciente
+        precio_actual = precios_actuales[0]
         
-        # Consultar HISTORIAL de precios (para cálculos estadísticos)
+        # Consultar HISTORIAL de precios
         query_historial = """
         SELECT observaciones, fecha_registro
         FROM historial_p
@@ -292,15 +303,13 @@ class AnalisisEstadistico:
         
         resultados_historial = execute_query(query_historial, (id_producto,), fetch=True)
         
-        # Extraer precios del historial manualmente (más seguro)
+        # Extraer precios del historial
         precios_historicos = []
         if resultados_historial:
             for fila in resultados_historial:
                 observacion = fila[0]
-                # Formato: "Precio actualizado de 50.00 a 45.00 Bs en Mercado"
                 try:
                     if "de " in observacion and " a " in observacion:
-                        # Extraer el precio "de X"
                         inicio = observacion.find("de ") + 3
                         fin = observacion.find(" a ", inicio)
                         precio_str = observacion[inicio:fin].strip()
@@ -310,23 +319,18 @@ class AnalisisEstadistico:
                     print(f"No se pudo extraer precio de: {observacion}")
                     continue
         
-        # Lista completa de precios para análisis (históricos + actuales)
+        # Lista completa de precios para análisis
         todos_precios = precios_historicos + precios_actuales
         
-        # Si solo hay precios actuales (sin historial), usar solo esos
         if not todos_precios:
             todos_precios = precios_actuales
         
-        print(f"Debug: Precios históricos: {precios_historicos}")
-        print(f"Debug: Precios actuales: {precios_actuales}")
-        print(f"Debug: Total precios para análisis: {todos_precios}")
-        
-        # Calcular estadísticas con TODOS los precios (históricos + actuales)
+        # Calcular estadísticas
         precio_promedio = statistics.mean(todos_precios)
         precio_minimo = min(todos_precios)
         precio_maximo = max(todos_precios)
         
-        # Volatilidad (desviación estándar)
+        # Volatilidad
         if len(todos_precios) > 1:
             volatilidad = statistics.stdev(todos_precios)
             volatilidad_porcentaje = (volatilidad / precio_promedio) * 100
@@ -334,15 +338,15 @@ class AnalisisEstadistico:
             volatilidad = 0
             volatilidad_porcentaje = 0
         
-        # Determinar tendencia (comparar precio actual con promedio)
+        # Tendencia
         if precio_actual < precio_promedio * 0.95:
-            tendencia = "📉 BAJISTA (por debajo del promedio)"
+            tendencia = "BAJISTA (por debajo del promedio)"
             color_tendencia = "#10b981"
         elif precio_actual > precio_promedio * 1.05:
-            tendencia = "📈 ALCISTA (por encima del promedio)"
+            tendencia = "ALCISTA (por encima del promedio)"
             color_tendencia = "#dc2626"
         else:
-            tendencia = "➡️ ESTABLE (cerca del promedio)"
+            tendencia = "ESTABLE (cerca del promedio)"
             color_tendencia = "#f59e0b"
         
         # Actualizar tarjetas
@@ -362,19 +366,23 @@ class AnalisisEstadistico:
         
         self.canvas.itemconfig("info_volatilidad", text=volatilidad_texto, fill="#e2e8f0")
         self.canvas.itemconfig("info_tendencia", text=tendencia, fill=color_tendencia)
-        self.canvas.itemconfig("info_mercados", 
-                              text=f"{len(set(mercados))} mercado(s): {', '.join(set(mercados))}", 
-                              fill="#e2e8f0")
+        
+        mercados_unicos = list(set(mercados))
+        mercados_texto = f"{len(mercados_unicos)} mercado(s): {', '.join(mercados_unicos[:3])}"
+        if len(mercados_unicos) > 3:
+            mercados_texto += "..."
+        
+        self.canvas.itemconfig("info_mercados", text=mercados_texto, fill="#e2e8f0")
         self.canvas.itemconfig("info_fecha", 
                               text=fecha_reciente.strftime("%d/%m/%Y %H:%M"), 
                               fill="#e2e8f0")
         
         diferencia = precio_maximo - precio_minimo
         self.canvas.itemconfig("info_rango", 
-                              text=f"{diferencia:.2f} Bs (diferencia entre min y max)", 
+                              text=f"{diferencia:.2f} Bs (diferencia min-max)", 
                               fill="#e2e8f0")
         
-        # Guardar datos para los gráficos
+        # Guardar datos
         self.datos_analisis = {
             'id_producto': id_producto,
             'nombre_producto': self.combo_producto.get(),
@@ -400,7 +408,7 @@ class AnalisisEstadistico:
             f"  • Actuales: {len(precios_actuales)}")
     
     def mostrar_grafico_evolucion(self):
-        """Genera y muestra el gráfico de evolución de precios en el tiempo"""
+        """Genera y muestra el gráfico de evolución de precios"""
         if not self.datos_analisis:
             messagebox.showwarning("Advertencia", "Primero debe analizar un producto")
             return
@@ -408,7 +416,7 @@ class AnalisisEstadistico:
         id_producto = self.datos_analisis['id_producto']
         nombre_producto = self.datos_analisis['nombre_producto']
         
-        # Obtener datos temporales del historial con TODAS las transiciones
+        # Obtener datos temporales del historial
         query_temporal = """
         SELECT observaciones, fecha_registro
         FROM historial_p
@@ -430,15 +438,14 @@ class AnalisisEstadistico:
         actuales = execute_query(query_actuales, (id_producto,), fetch=True)
         
         # Construir serie temporal
-        puntos_temporales = []  # Lista de (fecha, precio)
+        puntos_temporales = []
         
-        # Procesar historial - SOLO el precio NUEVO (el "a Y")
+        # Procesar historial
         for fila in historial:
             observacion = fila[0]
             fecha = fila[1]
             
             try:
-                # Extraer SOLO el precio nuevo (el "a Y")
                 if " a " in observacion and " Bs" in observacion:
                     inicio_nuevo = observacion.find(" a ") + 3
                     fin_nuevo = observacion.find(" Bs", inicio_nuevo)
@@ -450,23 +457,22 @@ class AnalisisEstadistico:
                 print(f"Error procesando: {observacion}")
                 continue
         
-        # Agregar precios actuales (pueden ser actualizaciones sin historial)
+        # Agregar precios actuales
         for fila in actuales:
             precio = float(fila[0])
             fecha = fila[1]
             puntos_temporales.append((fecha, precio))
         
-        # Verificar que hay datos suficientes
+        # Verificar datos suficientes
         if len(puntos_temporales) < 1:
             messagebox.showinfo("Información", 
                 "No hay suficientes datos temporales para generar el gráfico.\n\n"
                 "Actualice los precios varias veces para ver la evolución.")
             return
         
-        # Ordenar por fecha y eliminar duplicados (mismo timestamp)
+        # Ordenar y eliminar duplicados
         puntos_temporales = sorted(set(puntos_temporales), key=lambda x: x[0])
         
-        # Si hay muy pocos puntos únicos
         if len(puntos_temporales) < 2:
             messagebox.showinfo("Información", 
                 "No hay suficientes cambios de precio para mostrar evolución.\n\n"
@@ -476,10 +482,6 @@ class AnalisisEstadistico:
         
         fechas_ordenadas = [p[0] for p in puntos_temporales]
         precios_ordenados = [p[1] for p in puntos_temporales]
-        
-        print(f"Debug - Puntos en el gráfico: {len(puntos_temporales)}")
-        for fecha, precio in puntos_temporales:
-            print(f"  {fecha.strftime('%d/%m/%Y %H:%M:%S')} → {precio:.2f} Bs")
         
         # Crear ventana para el gráfico
         ventana_grafico = tk.Toplevel(self.frame_principal)
@@ -502,24 +504,23 @@ class AnalisisEstadistico:
         ax.set_xlabel('Fecha', fontsize=12, color='#94a3b8')
         ax.set_ylabel('Precio (Bs)', fontsize=12, color='#94a3b8')
         
-        # Configurar colores del grid
+        # Configurar grid
         ax.grid(True, alpha=0.2, color='#475569', linestyle='--')
         ax.tick_params(colors='#94a3b8')
         
-        # Rotar fechas para mejor legibilidad
+        # Rotar fechas
         plt.xticks(rotation=45, ha='right')
         
-        # Ajustar layout
         plt.tight_layout()
         
-        # Agregar línea del promedio
+        # Línea del promedio
         promedio = self.datos_analisis['precio_promedio']
         ax.axhline(y=promedio, color='#10b981', linestyle='--', linewidth=2, 
                   label=f'Promedio: {promedio:.2f} Bs', alpha=0.7)
         ax.legend(loc='best', facecolor='#1e293b', edgecolor='#475569', 
                  labelcolor='#e2e8f0')
         
-        # Incrustar gráfico en ventana Tkinter
+        # Incrustar gráfico
         canvas = FigureCanvasTkAgg(fig, master=ventana_grafico)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -528,7 +529,7 @@ class AnalisisEstadistico:
         frame_botones = tk.Frame(ventana_grafico, bg="#0a0f1e")
         frame_botones.pack(fill=tk.X, padx=10, pady=10)
         
-        # Botón para guardar gráfico
+        # Botón guardar
         btn_guardar = tk.Button(
             frame_botones,
             text="💾 Guardar Gráfico",
@@ -556,7 +557,6 @@ class AnalisisEstadistico:
     
     def guardar_grafico(self, figura, nombre_producto, tipo_grafico):
         """Guarda el gráfico como imagen PNG"""
-        # Limpiar nombre del producto para nombre de archivo
         nombre_limpio = nombre_producto.replace(" ", "_").replace("(", "").replace(")", "")
         nombre_archivo = f"grafico_{tipo_grafico}_{nombre_limpio}.png"
         
@@ -588,7 +588,7 @@ class AnalisisEstadistico:
             padx=25, pady=8,
             command=self.volver
         )
-        self.btn_volver.place(x=380, y=540)
+        self.btn_volver.place(x=380, y=555)
     
     def volver(self):
         """Vuelve al menú principal"""

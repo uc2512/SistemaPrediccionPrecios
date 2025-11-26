@@ -19,15 +19,15 @@ class SistemaMercado:
         self.root.configure(bg="#0a0f1e")
         self.root.resizable(False, False)
         
-        # Variables para mantener las referencias de las imágenes
+        
         self.logo_izquierdo = None
         self.logo_derecho = None
         
         self.inicializar_base_datos()
-        # Centrar la ventana en la pantalla
+        
         self.centrar_ventana()
         
-        # Crear la interfaz inicial
+       
         self.crear_interfaz_inicial()
     
     def inicializar_base_datos(self):
@@ -102,7 +102,7 @@ class SistemaMercado:
         self.canvas.create_text(450, 220, 
                                text="Predicción de Precios del Mercado", 
                                font=("Arial", 28, "bold"), 
-                               fill="#3b82f6")
+                               fill="#e2e8f0")
         
         # Subtítulo con mejor espaciado
         self.canvas.create_text(450, 265, 
@@ -115,10 +115,8 @@ class SistemaMercado:
                                font=("Arial", 11), 
                                fill="#94a3b8")
         
-        # Tarjetas de características más pequeñas y espaciadas
         info_y = 350
         
-        # Tarjeta 1 - Análisis Estadístico
         self.canvas.create_rectangle(145, info_y-25, 275, info_y+30, 
                                      fill="#0f1419", outline="#10b981", width=1,
                                      tags="card1")
@@ -130,7 +128,7 @@ class SistemaMercado:
                                font=("Arial", 9, "bold"), 
                                fill="#e2e8f0")
         
-        # Tarjeta 2 - Base de Datos (corregida)
+        
         self.canvas.create_rectangle(320, info_y-25, 580, info_y+30, 
                                      fill="#0f1419", outline="#8b5cf6", width=1,
                                      tags="card2")
@@ -142,7 +140,7 @@ class SistemaMercado:
                                font=("Arial", 9, "bold"), 
                                fill="#e2e8f0")
         
-        # Tarjeta 3 - Predicción Inteligente
+       
         self.canvas.create_rectangle(625, info_y-25, 755, info_y+30, 
                                      fill="#0f1419", outline="#f59e0b", width=1,
                                      tags="card3")
@@ -154,7 +152,7 @@ class SistemaMercado:
                                font=("Arial", 9, "bold"), 
                                fill="#e2e8f0")
         
-        # Efectos hover para tarjetas
+        
         self.canvas.tag_bind("card1", "<Enter>", lambda e: self.hover_card(145, info_y-25, 275, info_y+30, "#10b981"))
         self.canvas.tag_bind("card1", "<Leave>", lambda e: self.leave_card(145, info_y-25, 275, info_y+30, "#10b981"))
         
@@ -164,10 +162,10 @@ class SistemaMercado:
         self.canvas.tag_bind("card3", "<Enter>", lambda e: self.hover_card(625, info_y-25, 755, info_y+30, "#f59e0b"))
         self.canvas.tag_bind("card3", "<Leave>", lambda e: self.leave_card(625, info_y-25, 755, info_y+30, "#f59e0b"))
         
-        # Botón de inicio moderno y animado
+       
         self.btn_inicio = tk.Button(
             self.frame_principal,
-            text="🚀  INICIAR SISTEMA",
+            text="Iniciar Sistema",
             font=("Arial", 14, "bold"),
             bg="#3b82f6",
             fg="white",
@@ -182,17 +180,15 @@ class SistemaMercado:
         )
         self.btn_inicio.place(x=450, y=430, anchor="center")
         
-        # Efecto hover para el botón
+        
         self.btn_inicio.bind("<Enter>", self.hover_enter)
         self.btn_inicio.bind("<Leave>", self.hover_leave)
         
-        # Sección de equipo más limpia
         self.canvas.create_text(450, 490, 
                                text="INTEGRANTES", 
                                font=("Arial", 9, "bold"), 
                                fill="#64748b")
         
-        # Nombres en formato más compacto
         nombres_linea1 = "Jhon Ever García Quispe  •  Uriel David Ribera Choque  •  Aldo Andrés Arandia Vásquez"
         nombres_linea2 = "José Raul Melgar Guagama  •  Yaimara Jissel Gil Inchu"
         
@@ -201,13 +197,6 @@ class SistemaMercado:
         self.canvas.create_text(450, 535, text=nombres_linea2, 
                                font=("Arial", 8), fill="#94a3b8", anchor="center")
         
-        # Copyright más discreto
-        self.canvas.create_text(450, 575, 
-                               text="© 2025 - Ingeniería de Sistemas UAB | v1.0 Beta", 
-                               font=("Arial", 8), 
-                               fill="#475569")
-        
-        # Animación sutil de entrada
         self.animar_entrada()
     
     def hover_card(self, x1, y1, x2, y2, color):
@@ -226,7 +215,7 @@ class SistemaMercado:
     
     def animar_entrada(self):
         """Animación sutil de aparición"""
-        pass  # Opcional: puedes agregar fade-in aquí
+        pass  
     
     def hover_enter(self, event):
         self.btn_inicio.config(bg="#2563eb", padx=50, pady=17)
@@ -241,16 +230,15 @@ class SistemaMercado:
     def mostrar_pantalla_carga(self):
         self.canvas.delete("all")
     
-        # Recrear logos
+       
         if self.logo_izquierdo:
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
         if self.logo_derecho:
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
     
-        # ===== PARTÍCULAS DE FONDO ANIMADAS =====
         self.particulas = []
         import random
-        for i in range(15):  # 15 partículas sutiles
+        for i in range(15): 
             x = random.randint(100, 800)
             y = random.randint(150, 550)
             size = random.randint(2, 5)
@@ -267,78 +255,63 @@ class SistemaMercado:
                 'direccion': random.choice([-1, 1])
             })
     
-        # Título de carga
         self.canvas.create_text(450, 200, 
                             text="Inicializando Sistema", 
                             font=("Arial", 26, "bold"), 
                             fill="#e2e8f0",
                             tags="carga_texto")
     
-        # Subtítulo
         self.canvas.create_text(450, 235, 
                             text="Preparando módulos y conexiones", 
                             font=("Arial", 12), 
                             fill="#94a3b8")
     
-        # ===== BARRA DE PROGRESO CON EFECTOS =====
-    
-        # Sombra de la barra (efecto de profundidad)
         self.canvas.create_rectangle(202, 282, 702, 317, 
                                     fill="#0a0f1e", outline="",
                                     tags="barra_sombra")
     
-        # Fondo de la barra
         self.canvas.create_rectangle(200, 280, 700, 315, 
                                     fill="#1e293b", outline="#334155", width=2,
                                     tags="barra_fondo")
     
-        # Capa de brillo interno (efecto de profundidad)
         self.canvas.create_rectangle(202, 282, 698, 290, 
                                     fill="#2d3748", outline="",
                                     tags="barra_brillo_interno")
     
-        # Barra de progreso (VERDE con gradiente simulado)
         self.barra_progreso = self.canvas.create_rectangle(200, 280, 200, 315, 
                                                         fill="#10b981", outline="",
                                                         tags="barra_progreso")
     
-        # Capa superior de brillo (efecto cristal)
         self.barra_brillo = self.canvas.create_rectangle(200, 280, 200, 290,
                                                         fill="#34d399", outline="",
                                                         tags="barra_brillo")
     
-        # Borde decorativo de la barra activa
         self.barra_borde = self.canvas.create_rectangle(200, 280, 200, 315,
                                                         outline="#059669", width=2,
                                                         tags="barra_borde")
     
-        # Texto de porcentaje
         self.texto_porcentaje = self.canvas.create_text(450, 350, 
                                                         text="0%", 
                                                         font=("Arial", 16, "bold"), 
                                                         fill="#10b981",  # Verde
                                                         tags="porcentaje")
     
-        # Texto de estado con ícono
         self.texto_estado = self.canvas.create_text(450, 390, 
                                                     text="⚙️ Conectando a base de datos...", 
                                                     font=("Arial", 11), 
                                                     fill="#94a3b8",
                                                     tags="estado")
     
-        # Indicador de carga (puntos animados) - VERDE
         self.puntos_carga = self.canvas.create_text(450, 430, 
                                                     text="●", 
                                                     font=("Arial", 18), 
                                                     fill="#10b981",  # Verde
                                                     tags="puntos")
     
-        # Anillo pulsante alrededor de los puntos (efecto sutil)
         self.anillo_pulso = self.canvas.create_oval(440, 420, 460, 440,
                                                     outline="#10b981", width=2,
                                                     tags="anillo_pulso")
     
-        # Líneas decorativas laterales
         self.canvas.create_line(150, 300, 190, 300, fill="#10b981", width=2, tags="linea_izq")
         self.canvas.create_line(710, 300, 750, 300, fill="#10b981", width=2, tags="linea_der")
     
@@ -352,7 +325,7 @@ class SistemaMercado:
             "✅ Finalizando configuración..."
         ]
         self.estado_actual = 0
-        self.pulso_dir = 1  # Para animación del pulso
+        self.pulso_dir = 1  
         self.pulso_scale = 1.0
     
         self.animar_carga()
@@ -363,20 +336,16 @@ class SistemaMercado:
         if self.progreso <= 100:
             nuevo_ancho = 200 + (500 * self.progreso / 100)
         
-            # Actualizar barra principal
+            
             self.canvas.coords(self.barra_progreso, 200, 280, nuevo_ancho, 315)
         
-            # Actualizar brillo superior (más corto que la barra)
             brillo_ancho = max(200, nuevo_ancho - 10)
             self.canvas.coords(self.barra_brillo, 200, 280, brillo_ancho, 290)
         
-            # Actualizar borde
             self.canvas.coords(self.barra_borde, 200, 280, nuevo_ancho, 315)
         
-            # Actualizar porcentaje
             self.canvas.itemconfig(self.texto_porcentaje, text=f"{self.progreso}%")
         
-            # Cambiar color del porcentaje según progreso
             if self.progreso < 33:
                 self.canvas.itemconfig(self.texto_porcentaje, fill="#10b981")  # Verde
             elif self.progreso < 66:
@@ -384,26 +353,25 @@ class SistemaMercado:
             else:
                 self.canvas.itemconfig(self.texto_porcentaje, fill="#059669")  # Verde oscuro
         
-            # Cambiar estado
             if self.progreso % 17 == 0 and self.estado_actual < len(self.estados_carga):
                 self.canvas.itemconfig(self.texto_estado, text=self.estados_carga[self.estado_actual])
                 self.estado_actual += 1
         
-            # Animar puntos de carga
+            
             puntos = ["●", "●●", "●●●"][int(self.progreso / 7) % 3]
             self.canvas.itemconfig(self.puntos_carga, text=puntos)
         
-            #  Animar líneas laterales (expandir/contraer)
+           
             if self.progreso % 10 == 0:
-                # Línea izquierda
+                
                 self.canvas.coords("linea_izq", 150, 300, 190 - (self.progreso % 20), 300)
-                # Línea derecha
+                
                 self.canvas.coords("linea_der", 710 + (self.progreso % 20), 300, 750, 300)
         
             self.progreso += 2
             self.root.after(50, self.animar_carga)
         else:
-            # Efecto final: destello verde
+            
             self.canvas.itemconfig(self.barra_progreso, fill="#059669")
             self.canvas.itemconfig(self.texto_porcentaje, text="100%", fill="#059669")
             self.root.after(500, self.mostrar_menu_principal)
@@ -412,10 +380,10 @@ class SistemaMercado:
         if self.progreso <= 100:
             import random
             for p in self.particulas:
-                # Mover partícula
+                
                 p['y'] += p['velocidad'] * p['direccion']
                 
-                # Si sale de la pantalla, reiniciar posición
+                
                 if p['y'] < 150:
                     p['y'] = 550
                     p['x'] = random.randint(100, 800)
@@ -423,13 +391,13 @@ class SistemaMercado:
                     p['y'] = 150
                     p['x'] = random.randint(100, 800)
                 
-                # Actualizar posición en canvas
+                
                 coords = self.canvas.coords(p['id'])
                 if coords:
                     size = coords[2] - coords[0]
                     self.canvas.coords(p['id'], p['x'], p['y'], p['x']+size, p['y']+size)
                 
-                # Cambiar opacidad aleatoriamente (simulado con color)
+               
                 if random.random() > 0.95:
                     colores = ["#10b981", "#34d399", "#059669", "#064e3b"]
                     self.canvas.itemconfig(p['id'], fill=random.choice(colores))
