@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import pandas as pd
+import numpy as np
 from database.connection import execute_query
 
 class GestionMercados:
@@ -7,6 +9,9 @@ class GestionMercados:
         self.canvas = canvas
         self.frame_principal = frame_principal
         self.volver_menu = volver_menu
+        
+        # Variables
+        self.df_mercados = None  # DataFrame para almacenar mercados
         
         self.canvas.delete("all")
         self.crear_interfaz()
@@ -38,127 +43,70 @@ class GestionMercados:
                                font=("Arial", 12, "bold"), 
                                fill="#3b82f6")
         
-        # Labels y Entries - Columna 1
+        # Configuración de campos usando numpy para posiciones
         y_base = 135
         spacing = 40
         
-        # Nombre del Mercado
-        self.canvas.create_text(120, y_base, 
-                               text="Nombre:", 
-                               font=("Arial", 10, "bold"), 
-                               fill="#e2e8f0", anchor="w")
-        self.entry_nombre = tk.Entry(self.frame_principal, 
-                                     font=("Arial", 10), 
-                                     bg="#0f172a", fg="white",
-                                     insertbackground="white",
-                                     width=30)
-        self.entry_nombre.place(x=200, y=y_base-10)
+        # Diccionario de configuración de campos
+        campos_config = {
+            'nombre': ('Nombre:', 120, y_base, 30),
+            'ciudad': ('Ciudad:', 120, y_base + spacing, 30),
+            'departamento': ('Departamento:', 120, y_base + spacing*2, 30),
+            'barrio': ('Barrio:', 480, y_base, 30),
+            'avenida': ('Avenida:', 480, y_base + spacing, 30)
+        }
         
-        # Ciudad
-        self.canvas.create_text(120, y_base + spacing, 
-                               text="Ciudad:", 
-                               font=("Arial", 10, "bold"), 
-                               fill="#e2e8f0", anchor="w")
-        self.entry_ciudad = tk.Entry(self.frame_principal, 
-                                      font=("Arial", 10), 
-                                      bg="#0f172a", fg="white",
-                                      insertbackground="white",
-                                      width=30)
-        self.entry_ciudad.place(x=200, y=y_base + spacing - 10)
+        # Crear campos dinámicamente
+        self.entries = {}
+        for key, (label, x, y, width) in campos_config.items():
+            self.canvas.create_text(x, y, 
+                                   text=label, 
+                                   font=("Arial", 10, "bold"), 
+                                   fill="#e2e8f0", anchor="w")
+            
+            entry = tk.Entry(self.frame_principal, 
+                           font=("Arial", 10), 
+                           bg="#0f172a", fg="white",
+                           insertbackground="white",
+                           width=width)
+            entry.place(x=x + 80 if x == 120 else x + 80, y=y-10)
+            self.entries[key] = entry
         
-        # Departamento
-        self.canvas.create_text(120, y_base + spacing*2, 
-                               text="Departamento:", 
-                               font=("Arial", 10, "bold"), 
-                               fill="#e2e8f0", anchor="w")
-        self.entry_departamento = tk.Entry(self.frame_principal, 
-                                           font=("Arial", 10), 
-                                           bg="#0f172a", fg="white",
-                                           insertbackground="white",
-                                           width=30)
-        self.entry_departamento.place(x=200, y=y_base + spacing*2 - 10)
-        
-        # Columna 2
-        col2_x = 480
-        
-        # Barrio
-        self.canvas.create_text(col2_x, y_base, 
-                               text="Barrio:", 
-                               font=("Arial", 10, "bold"), 
-                               fill="#e2e8f0", anchor="w")
-        self.entry_barrio = tk.Entry(self.frame_principal, 
-                                     font=("Arial", 10), 
-                                     bg="#0f172a", fg="white",
-                                     insertbackground="white",
-                                     width=30)
-        self.entry_barrio.place(x=560, y=y_base-10)
-        
-        # Avenida
-        self.canvas.create_text(col2_x, y_base + spacing, 
-                               text="Avenida:", 
-                               font=("Arial", 10, "bold"), 
-                               fill="#e2e8f0", anchor="w")
-        self.entry_avenida = tk.Entry(self.frame_principal, 
-                                      font=("Arial", 10), 
-                                      bg="#0f172a", fg="white",
-                                      insertbackground="white",
-                                      width=30)
-        self.entry_avenida.place(x=560, y=y_base + spacing - 10)
-        
-        # Dirección completa
+        # Dirección completa (campo especial más largo)
         self.canvas.create_text(120, y_base + spacing*3, 
                                text="Dirección:", 
                                font=("Arial", 10, "bold"), 
                                fill="#e2e8f0", anchor="w")
-        self.entry_direccion = tk.Entry(self.frame_principal, 
-                                        font=("Arial", 10), 
-                                        bg="#0f172a", fg="white",
-                                        insertbackground="white",
-                                        width=75)
-        self.entry_direccion.place(x=200, y=y_base + spacing*3 - 10)
+        self.entries['direccion'] = tk.Entry(
+            self.frame_principal, 
+            font=("Arial", 10), 
+            bg="#0f172a", fg="white",
+            insertbackground="white",
+            width=75
+        )
+        self.entries['direccion'].place(x=200, y=y_base + spacing*3 - 10)
         
-        # Botones de acción
+        # Botones de acción del formulario
+        btn_config = [
+            ('agregar', "✚ Agregar", "#10b981", "#059669", 50, self.agregar_mercado),
+            ('editar', "✎ Editar", "#f59e0b", "#d97706", 170, self.editar_mercado),
+            ('eliminar', "🗑 Eliminar", "#dc2626", "#991b1b", 630, self.eliminar_mercado),
+            ('limpiar', "⟲ Limpiar", "#6366f1", "#4f46e5", 750, self.limpiar_formulario)
+        ]
+        
         btn_y = 273
-        
-        self.btn_agregar = tk.Button(self.frame_principal,
-                                     text="✚ Agregar",
-                                     font=("Arial", 10, "bold"),
-                                     bg="#10b981", fg="white",
-                                     activebackground="#059669",
-                                     relief=tk.FLAT, cursor="hand2",
-                                     padx=15, pady=5,
-                                     command=self.agregar_mercado)
-        self.btn_agregar.place(x=50, y=btn_y)
-        
-        self.btn_editar = tk.Button(self.frame_principal,
-                                    text="✎ Editar",
-                                    font=("Arial", 10, "bold"),
-                                    bg="#f59e0b", fg="white",
-                                    activebackground="#d97706",
-                                    relief=tk.FLAT, cursor="hand2",
-                                    padx=15, pady=5,
-                                    command=self.editar_mercado)
-        self.btn_editar.place(x=170, y=btn_y)
-        
-        self.btn_eliminar = tk.Button(self.frame_principal,
-                                      text="🗑 Eliminar",
-                                      font=("Arial", 10, "bold"),
-                                      bg="#dc2626", fg="white",
-                                      activebackground="#991b1b",
-                                      relief=tk.FLAT, cursor="hand2",
-                                      padx=15, pady=5,
-                                      command=self.eliminar_mercado)
-        self.btn_eliminar.place(x=630, y=btn_y)
-        
-        self.btn_limpiar = tk.Button(self.frame_principal,
-                                     text="⟲ Limpiar",
-                                     font=("Arial", 10, "bold"),
-                                     bg="#6366f1", fg="white",
-                                     activebackground="#4f46e5",
-                                     relief=tk.FLAT, cursor="hand2",
-                                     padx=15, pady=5,
-                                     command=self.limpiar_formulario)
-        self.btn_limpiar.place(x=750, y=btn_y)
+        self.buttons = {}
+        for attr, text, bg, active_bg, x, cmd in btn_config:
+            btn = tk.Button(self.frame_principal,
+                          text=text,
+                          font=("Arial", 10, "bold"),
+                          bg=bg, fg="white",
+                          activebackground=active_bg,
+                          relief=tk.FLAT, cursor="hand2",
+                          padx=15, pady=5,
+                          command=cmd)
+            btn.place(x=x, y=btn_y)
+            self.buttons[attr] = btn
         
         # === SECCIÓN TABLA ===
         self.canvas.create_rectangle(50, 295, 850, 530, 
@@ -177,32 +125,24 @@ class GestionMercados:
         scrollbar = ttk.Scrollbar(self.frame_tabla, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
+        # Configuración de columnas con numpy
+        columnas = ["ID", "Nombre", "Ciudad", "Departamento", "Barrio", "Avenida", "Estado"]
+        anchos = np.array([40, 180, 100, 100, 100, 100, 80])
+        
         # Treeview
         self.tree = ttk.Treeview(self.frame_tabla,
-                                columns=("ID", "Nombre", "Ciudad", "Departamento", 
-                                        "Barrio", "Avenida", "Estado"),
+                                columns=columnas,
                                 show="headings",
                                 yscrollcommand=scrollbar.set,
                                 height=8)
         
         scrollbar.config(command=self.tree.yview)
         
-        # Configurar columnas
-        self.tree.heading("ID", text="ID")
-        self.tree.heading("Nombre", text="Nombre del Mercado")
-        self.tree.heading("Ciudad", text="Ciudad")
-        self.tree.heading("Departamento", text="Departamento")
-        self.tree.heading("Barrio", text="Barrio")
-        self.tree.heading("Avenida", text="Avenida")
-        self.tree.heading("Estado", text="Estado")
-        
-        self.tree.column("ID", width=40, anchor="center")
-        self.tree.column("Nombre", width=180, anchor="w")
-        self.tree.column("Ciudad", width=100, anchor="w")
-        self.tree.column("Departamento", width=100, anchor="w")
-        self.tree.column("Barrio", width=100, anchor="w")
-        self.tree.column("Avenida", width=100, anchor="w")
-        self.tree.column("Estado", width=80, anchor="center")
+        # Configurar columnas con numpy
+        for i, col in enumerate(columnas):
+            self.tree.heading(col, text=col)
+            anchor = "center" if i in [0, 6] else "w"
+            self.tree.column(col, width=int(anchos[i]), anchor=anchor)
         
         self.tree.pack(fill=tk.BOTH, expand=True)
         
@@ -236,7 +176,7 @@ class GestionMercados:
         self.btn_volver.place(x=380, y=550)
     
     def cargar_mercados(self):
-        """Carga mercados desde la base de datos"""
+        """Carga mercados usando pandas"""
         self.tree.delete(*self.tree.get_children())
         
         query = """
@@ -249,23 +189,29 @@ class GestionMercados:
         resultados = execute_query(query, fetch=True)
         
         if resultados:
-            for fila in resultados:
-                estado = "Activo" if fila[6] else "Inactivo"
+            # Usar pandas DataFrame
+            columnas = ['id', 'nombre', 'ciudad', 'depto', 'barrio', 'avenida', 'activo']
+            self.df_mercados = pd.DataFrame(resultados, columns=columnas)
+            
+            # Mapear valores booleanos a texto
+            self.df_mercados['estado_texto'] = self.df_mercados['activo'].map({True: 'Activo', False: 'Inactivo'})
+            
+            # Insertar en tabla
+            for row in self.df_mercados.itertuples(index=False):
                 self.tree.insert("", tk.END, values=(
-                    fila[0], fila[1], fila[2], fila[3], 
-                    fila[4], fila[5], estado
+                    row.id, row.nombre, row.ciudad, row.depto,
+                    row.barrio, row.avenida, row.estado_texto
                 ))
+    
+    def obtener_datos_formulario(self):
+        """Obtiene datos del formulario como diccionario"""
+        return {key: entry.get().strip() for key, entry in self.entries.items()}
     
     def agregar_mercado(self):
         """Agrega un nuevo mercado"""
-        nombre = self.entry_nombre.get().strip()
-        ciudad = self.entry_ciudad.get().strip()
-        departamento = self.entry_departamento.get().strip()
-        barrio = self.entry_barrio.get().strip()
-        avenida = self.entry_avenida.get().strip()
-        direccion = self.entry_direccion.get().strip()
+        datos = self.obtener_datos_formulario()
         
-        if not nombre:
+        if not datos['nombre']:
             messagebox.showwarning("Advertencia", "El nombre del mercado es obligatorio")
             return
         
@@ -275,32 +221,48 @@ class GestionMercados:
         VALUES (%s, %s, %s, %s, %s, %s);
         """
         
-        if execute_query(query, (nombre, ciudad, departamento, barrio, avenida, direccion)):
-            messagebox.showinfo("Éxito", f"Mercado '{nombre}' agregado correctamente")
+        params = (datos['nombre'], datos['ciudad'], datos['departamento'],
+                 datos['barrio'], datos['avenida'], datos['direccion'])
+        
+        if execute_query(query, params):
+            messagebox.showinfo("Éxito", f"Mercado '{datos['nombre']}' agregado correctamente")
             self.limpiar_formulario()
             self.cargar_mercados()
         else:
             messagebox.showerror("Error", "No se pudo agregar el mercado")
     
     def seleccionar_mercado(self, event):
-        """Llena el formulario con el mercado seleccionado"""
+        """Llena el formulario con el mercado seleccionado usando pandas"""
         seleccion = self.tree.selection()
         if seleccion:
             item = self.tree.item(seleccion[0])
             valores = item['values']
             
-            self.limpiar_formulario()
-            self.entry_nombre.insert(0, valores[1])
-            self.entry_ciudad.insert(0, valores[2])
-            self.entry_departamento.insert(0, valores[3])
-            self.entry_barrio.insert(0, valores[4])
-            self.entry_avenida.insert(0, valores[5])
-            
-            # Cargar dirección completa de la BD
-            query = "SELECT direccion FROM mercado WHERE id_mercado = %s;"
-            resultado = execute_query(query, (valores[0],), fetch=True)
-            if resultado and resultado[0][0]:
-                self.entry_direccion.insert(0, resultado[0][0])
+            # Buscar en DataFrame si existe
+            if self.df_mercados is not None:
+                mercado = self.df_mercados[self.df_mercados['id'] == valores[0]].iloc[0]
+                
+                # Mapear campos
+                campos_map = {
+                    'nombre': 'nombre',
+                    'ciudad': 'ciudad',
+                    'departamento': 'depto',
+                    'barrio': 'barrio',
+                    'avenida': 'avenida'
+                }
+                
+                # Llenar formulario
+                self.limpiar_formulario()
+                for key, col in campos_map.items():
+                    valor = mercado[col]
+                    if pd.notna(valor):
+                        self.entries[key].insert(0, str(valor))
+                
+                # Cargar dirección completa
+                query = "SELECT direccion FROM mercado WHERE id_mercado = %s;"
+                resultado = execute_query(query, (valores[0],), fetch=True)
+                if resultado and resultado[0][0]:
+                    self.entries['direccion'].insert(0, resultado[0][0])
     
     def editar_mercado(self):
         """Edita el mercado seleccionado"""
@@ -312,14 +274,9 @@ class GestionMercados:
         item = self.tree.item(seleccion[0])
         id_mercado = item['values'][0]
         
-        nombre = self.entry_nombre.get().strip()
-        ciudad = self.entry_ciudad.get().strip()
-        departamento = self.entry_departamento.get().strip()
-        barrio = self.entry_barrio.get().strip()
-        avenida = self.entry_avenida.get().strip()
-        direccion = self.entry_direccion.get().strip()
+        datos = self.obtener_datos_formulario()
         
-        if not nombre:
+        if not datos['nombre']:
             messagebox.showwarning("Advertencia", "El nombre del mercado es obligatorio")
             return
         
@@ -330,8 +287,10 @@ class GestionMercados:
         WHERE id_mercado=%s;
         """
         
-        if execute_query(query, (nombre, ciudad, departamento, barrio, 
-                                avenida, direccion, id_mercado)):
+        params = (datos['nombre'], datos['ciudad'], datos['departamento'],
+                 datos['barrio'], datos['avenida'], datos['direccion'], id_mercado)
+        
+        if execute_query(query, params):
             messagebox.showinfo("Éxito", "Mercado actualizado correctamente")
             self.limpiar_formulario()
             self.cargar_mercados()
@@ -367,12 +326,8 @@ class GestionMercados:
     
     def limpiar_formulario(self):
         """Limpia todos los campos del formulario"""
-        self.entry_nombre.delete(0, tk.END)
-        self.entry_ciudad.delete(0, tk.END)
-        self.entry_departamento.delete(0, tk.END)
-        self.entry_barrio.delete(0, tk.END)
-        self.entry_avenida.delete(0, tk.END)
-        self.entry_direccion.delete(0, tk.END)
+        for entry in self.entries.values():
+            entry.delete(0, tk.END)
         
         # Deseleccionar en el tree
         for item in self.tree.selection():

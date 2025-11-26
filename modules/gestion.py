@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import pandas as pd
+import numpy as np
 from database.connection import DatabaseConnection, execute_query
 
 class GestionProductos:
@@ -11,6 +13,7 @@ class GestionProductos:
         # Variables del formulario
         self.producto_seleccionado = None
         self.modo_edicion = False
+        self.df_productos = None  # DataFrame para almacenar productos
         
         # Limpiar canvas
         self.canvas.delete("all")
@@ -170,7 +173,7 @@ class GestionProductos:
         self.btn_limpiar.place(x=190, y=y_botones)
     
     def crear_tabla(self):
-        """Crea la tabla para mostrar productos"""
+        """Crea la tabla para mostrar productos usando pandas para configuración"""
         
         # Fondo de la tabla
         self.canvas.create_rectangle(370, 100, 850, 540, 
@@ -189,10 +192,14 @@ class GestionProductos:
         scrollbar = tk.Scrollbar(frame_tabla)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
+        # Configuración de columnas con numpy array para dimensiones
+        columnas = ["ID", "Nombre", "Categoría", "Unidad"]
+        anchos = np.array([40, 180, 120, 80])
+        
         # Treeview (tabla)
         self.tree = ttk.Treeview(
             frame_tabla,
-            columns=("ID", "Nombre", "Categoría", "Unidad"),
+            columns=columnas,
             show="headings",
             height=14,
             yscrollcommand=scrollbar.set
@@ -200,16 +207,11 @@ class GestionProductos:
         
         scrollbar.config(command=self.tree.yview)
         
-        # Configurar columnas
-        self.tree.heading("ID", text="ID")
-        self.tree.heading("Nombre", text="Nombre")
-        self.tree.heading("Categoría", text="Categoría")
-        self.tree.heading("Unidad", text="Unidad")
-        
-        self.tree.column("ID", width=40, anchor="center")
-        self.tree.column("Nombre", width=180)
-        self.tree.column("Categoría", width=120)
-        self.tree.column("Unidad", width=80, anchor="center")
+        # Configurar columnas usando numpy para iterar
+        for i, col in enumerate(columnas):
+            self.tree.heading(col, text=col)
+            anchor = "center" if i in [0, 3] else "w"
+            self.tree.column(col, width=int(anchos[i]), anchor=anchor)
         
         self.tree.pack(fill=tk.BOTH, expand=True)
         
@@ -272,23 +274,26 @@ class GestionProductos:
         self.btn_refrescar.place(x=730, y=y_btn)
     
     def cargar_categorias(self):
-        """Carga las categorías desde la base de datos"""
+        """Carga las categorías usando pandas"""
         query = "SELECT nombre FROM categorias ORDER BY nombre"
         categorias = execute_query(query, fetch=True)
         
         if categorias:
-            nombres_categorias = [cat[0] for cat in categorias]
+            # Usar pandas para procesar rápidamente
+            df_cat = pd.DataFrame(categorias, columns=['nombre'])
+            nombres_categorias = df_cat['nombre'].tolist()
+            
             self.combo_categoria['values'] = nombres_categorias
             if nombres_categorias:
                 self.combo_categoria.current(0)
     
     def cargar_productos(self):
-        """Carga todos los productos en la tabla"""
+        """Carga productos usando pandas para mejor manejo de datos"""
         # Limpiar tabla
         for item in self.tree.get_children():
             self.tree.delete(item)
         
-        # Consultar productos (ACTUALIZADO para nueva estructura)
+        # Consultar productos
         query = """
         SELECT id_producto, nombre_producto, categoria, unidad_medida
         FROM producto
@@ -298,36 +303,44 @@ class GestionProductos:
         
         productos = execute_query(query, fetch=True)
         
-        # Insertar en la tabla
         if productos:
-            for producto in productos:
-                self.tree.insert("", tk.END, values=producto)
+            # Usar pandas DataFrame para procesar datos
+            self.df_productos = pd.DataFrame(productos, 
+                                            columns=['id', 'nombre', 'categoria', 'unidad'])
+            
+            # Insertar en la tabla de forma eficiente
+            for row in self.df_productos.itertuples(index=False):
+                self.tree.insert("", tk.END, values=row)
     
     def agregar_producto(self):
-        """Agrega o actualiza un producto"""
-        # Validar campos
-        nombre = self.entry_nombre.get().strip()
-        categoria = self.combo_categoria.get()
-        unidad = self.combo_unidad.get()
-        descripcion = self.text_descripcion.get("1.0", tk.END).strip()
+        """Agrega o actualiza un producto con validación optimizada"""
+        # Obtener y validar datos usando dict comprehension
+        datos = {
+            'nombre': self.entry_nombre.get().strip(),
+            'categoria': self.combo_categoria.get(),
+            'unidad': self.combo_unidad.get(),
+            'descripcion': self.text_descripcion.get("1.0", tk.END).strip()
+        }
         
-        if not nombre:
+        # Validación compacta
+        if not datos['nombre']:
             messagebox.showwarning("Validación", "El nombre es obligatorio")
             return
         
-        if not categoria:
+        if not datos['categoria']:
             messagebox.showwarning("Validación", "Seleccione una categoría")
             return
         
         try:
             if self.modo_edicion and self.producto_seleccionado:
-                # Actualizar producto existente (ACTUALIZADO)
+                # Actualizar producto existente
                 query = """
                 UPDATE producto 
                 SET nombre_producto = %s, categoria = %s, unidad_medida = %s, descripcion = %s
                 WHERE id_producto = %s
                 """
-                params = (nombre, categoria, unidad, descripcion, self.producto_seleccionado)
+                params = (datos['nombre'], datos['categoria'], datos['unidad'], 
+                         datos['descripcion'], self.producto_seleccionado)
                 
                 if execute_query(query, params):
                     messagebox.showinfo("Éxito", "Producto actualizado correctamente")
@@ -336,12 +349,12 @@ class GestionProductos:
                 else:
                     messagebox.showerror("Error", "No se pudo actualizar el producto")
             else:
-                # Insertar nuevo producto (ACTUALIZADO)
+                # Insertar nuevo producto
                 query = """
                 INSERT INTO producto (nombre_producto, categoria, unidad_medida, descripcion)
                 VALUES (%s, %s, %s, %s)
                 """
-                params = (nombre, categoria, unidad, descripcion)
+                params = (datos['nombre'], datos['categoria'], datos['unidad'], datos['descripcion'])
                 
                 if execute_query(query, params):
                     messagebox.showinfo("Éxito", "Producto agregado correctamente")
@@ -354,7 +367,7 @@ class GestionProductos:
             messagebox.showerror("Error", f"Error al procesar: {str(e)}")
     
     def editar_producto(self):
-        """Prepara el formulario para editar"""
+        """Prepara el formulario para editar usando pandas para búsqueda rápida"""
         seleccion = self.tree.selection()
         if not seleccion:
             messagebox.showwarning("Advertencia", "Seleccione un producto de la tabla")
@@ -363,19 +376,23 @@ class GestionProductos:
         item = self.tree.item(seleccion[0])
         valores = item['values']
         
-        # Cargar datos en el formulario
-        self.producto_seleccionado = valores[0]
-        self.entry_nombre.delete(0, tk.END)
-        self.entry_nombre.insert(0, valores[1])
+        # Usar pandas para búsqueda rápida si el DataFrame existe
+        if self.df_productos is not None:
+            producto = self.df_productos[self.df_productos['id'] == valores[0]].iloc[0]
+            
+            # Cargar datos en el formulario
+            self.producto_seleccionado = int(producto['id'])
+            self.entry_nombre.delete(0, tk.END)
+            self.entry_nombre.insert(0, producto['nombre'])
+            
+            # Seleccionar categoría
+            if pd.notna(producto['categoria']):
+                self.combo_categoria.set(producto['categoria'])
+            
+            # Seleccionar unidad
+            self.combo_unidad.set(producto['unidad'])
         
-        # Seleccionar categoría
-        if valores[2]:
-            self.combo_categoria.set(valores[2])
-        
-        # Seleccionar unidad
-        self.combo_unidad.set(valores[3])
-        
-        # Cargar descripción (ACTUALIZADO)
+        # Cargar descripción
         query = "SELECT descripcion FROM producto WHERE id_producto = %s"
         result = execute_query(query, (self.producto_seleccionado,), fetch=True)
         if result and result[0][0]:
@@ -403,7 +420,6 @@ class GestionProductos:
         )
         
         if respuesta:
-            # ACTUALIZADO para nueva tabla
             query = "UPDATE producto SET activo = FALSE WHERE id_producto = %s"
             if execute_query(query, (id_producto,)):
                 messagebox.showinfo("Éxito", "Producto eliminado correctamente")
