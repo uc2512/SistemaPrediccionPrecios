@@ -3,8 +3,8 @@ from tkinter import ttk, messagebox, filedialog
 from database.connection import execute_query
 from datetime import datetime
 import csv
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import pandas as pd
+import numpy as np
 
 class GestionConsultas:
     def __init__(self, canvas, frame_principal, volver_menu):
@@ -16,219 +16,118 @@ class GestionConsultas:
         self.crear_interfaz_principal()
     
     def crear_interfaz_principal(self):
-        """Crea el menú principal de consultas y reportes"""
-        # Header
-        self.canvas.create_text(450, 30,
-            text="🔍 CONSULTAS Y REPORTES",
-            font=("Arial", 20, "bold"),
-            fill="#e2e8f0")
+        self.canvas.create_text(450, 30, text="🔍 CONSULTAS Y REPORTES",
+            font=("Arial", 20, "bold"), fill="#e2e8f0")
         
-        self.canvas.create_text(450, 55,
-            text="Búsqueda avanzada y generación de reportes",
-            font=("Arial", 11),
-            fill="#94a3b8")
+        self.canvas.create_text(450, 55, text="Búsqueda avanzada y generación de reportes",
+            font=("Arial", 11), fill="#94a3b8")
         
-        # Línea divisoria
         self.canvas.create_line(80, 75, 820, 75, fill="#334155", width=2)
         
-        # === SECCIÓN DE BÚSQUEDAS ===
-        self.canvas.create_rectangle(50, 95, 430, 480,
-            fill="#1e293b", outline="#06b6d4", width=2)
+        self.canvas.create_rectangle(50, 95, 430, 480, fill="#1e293b", outline="#06b6d4", width=2)
         
-        self.canvas.create_text(240, 115,
-            text="🔎 BÚSQUEDAS",
-            font=("Arial", 13, "bold"),
-            fill="#06b6d4")
+        self.canvas.create_text(240, 115, text="🔎 BÚSQUEDAS", font=("Arial", 13, "bold"), fill="#06b6d4")
         
-        # Tarjetas de búsqueda
-        y_busqueda = 160
-        spacing = 70
+        busquedas_config = np.array([
+            [240, 160, '🛒 Buscar Producto', 'Ver precios en todos los mercados', '#10b981'],
+            [240, 230, '🏪 Consultar Mercado', 'Ver todos los productos de un mercado', '#8b5cf6'],
+            [240, 300, '💰 Filtrar por Precio', 'Buscar ofertas en un rango de precio', '#f59e0b'],
+            [240, 370, '🏆 Rankings', 'Top productos y mejores mercados', '#ec4899']
+        ], dtype=object)
         
-        self.crear_boton_consulta(
-            240, y_busqueda,
-            "🛒 Buscar Producto",
-            "Ver precios en todos los mercados",
-            "#10b981",
-            self.buscar_producto
-        )
+        comandos_busqueda = [self.buscar_producto, self.consultar_mercado, 
+                            self.filtrar_por_precio, self.ver_rankings]
         
-        self.crear_boton_consulta(
-            240, y_busqueda + spacing,
-            "🏪 Consultar Mercado",
-            "Ver todos los productos de un mercado",
-            "#8b5cf6",
-            self.consultar_mercado
-        )
+        for i, (x, y, titulo, desc, color) in enumerate(busquedas_config):
+            self.crear_boton_consulta(int(x), int(y), titulo, desc, color, comandos_busqueda[i])
         
-        self.crear_boton_consulta(
-            240, y_busqueda + spacing*2,
-            "💰 Filtrar por Precio",
-            "Buscar ofertas en un rango de precio",
-            "#f59e0b",
-            self.filtrar_por_precio
-        )
+        self.canvas.create_rectangle(470, 95, 850, 480, fill="#1e293b", outline="#06b6d4", width=2)
         
-        self.crear_boton_consulta(
-            240, y_busqueda + spacing*3,
-            "🏆 Rankings",
-            "Top productos y mejores mercados",
-            "#ec4899",
-            self.ver_rankings
-        )
+        self.canvas.create_text(660, 115, text="📊 REPORTES", font=("Arial", 13, "bold"), fill="#06b6d4")
         
-        # === SECCIÓN DE REPORTES ===
-        self.canvas.create_rectangle(470, 95, 850, 480,
-            fill="#1e293b", outline="#06b6d4", width=2)
+        reportes_config = np.array([
+            [660, 160, '📄 Reporte General', 'Todos los productos con precios', '#3b82f6'],
+            [660, 230, '📈 Comparar Mercados', 'Comparativa de precios entre mercados', '#06b6d4'],
+            [660, 300, '📅 Historial de Cambios', 'Ver cambios de precio en el tiempo', '#8b5cf6'],
+            [660, 370, '💾 Exportar Datos', 'Guardar reportes en CSV/Excel', '#10b981']
+        ], dtype=object)
         
-        self.canvas.create_text(660, 115,
-            text="📊 REPORTES",
-            font=("Arial", 13, "bold"),
-            fill="#06b6d4")
+        comandos_reporte = [self.reporte_general, self.comparar_mercados,
+                           self.historial_cambios, self.exportar_datos]
         
-        y_reporte = 160
+        for i, (x, y, titulo, desc, color) in enumerate(reportes_config):
+            self.crear_boton_consulta(int(x), int(y), titulo, desc, color, comandos_reporte[i])
         
-        self.crear_boton_consulta(
-            660, y_reporte,
-            "📄 Reporte General",
-            "Todos los productos con precios",
-            "#3b82f6",
-            self.reporte_general
-        )
+        self.canvas.create_rectangle(50, 500, 850, 540, fill="#1e293b", outline="#334155", width=1)
         
-        self.crear_boton_consulta(
-            660, y_reporte + spacing,
-            "📈 Comparar Mercados",
-            "Comparativa de precios entre mercados",
-            "#06b6d4",
-            self.comparar_mercados
-        )
-        
-        self.crear_boton_consulta(
-            660, y_reporte + spacing*2,
-            "📅 Historial de Cambios",
-            "Ver cambios de precio en el tiempo",
-            "#8b5cf6",
-            self.historial_cambios
-        )
-        
-        self.crear_boton_consulta(
-            660, y_reporte + spacing*3,
-            "💾 Exportar Datos",
-            "Guardar reportes en CSV/Excel",
-            "#10b981",
-            self.exportar_datos
-        )
-        
-        # === ESTADÍSTICAS RÁPIDAS ===
-        self.canvas.create_rectangle(50, 500, 850, 540,
-            fill="#1e293b", outline="#334155", width=1)
-        
-        # Obtener estadísticas
         self.mostrar_estadisticas_rapidas()
         
-        # Botón Volver
-        self.btn_volver = tk.Button(
-            self.frame_principal,
-            text="← Volver al Menú",
-            font=("Arial", 11, "bold"),
-            bg="#475569", fg="white",
-            activebackground="#334155",
-            relief=tk.FLAT, cursor="hand2",
-            padx=20, pady=8,
-            command=self.volver
-        )
+        self.btn_volver = tk.Button(self.frame_principal, text="← Volver al Menú",
+            font=("Arial", 11, "bold"), bg="#475569", fg="white",
+            activebackground="#334155", relief=tk.FLAT, cursor="hand2",
+            padx=20, pady=8, command=self.volver)
         self.btn_volver.place(x=380, y=560)
     
     def crear_boton_consulta(self, x, y, titulo, descripcion, color, comando):
-        """Crea un botón de consulta estilizado"""
+        tag = f"btn_{x}_{y}"
+        
         rect_id = self.canvas.create_rectangle(x-160, y-25, x+160, y+25,
-            fill="#0f172a", outline=color, width=2,
-            tags=f"btn_{x}_{y}")
+            fill="#0f172a", outline=color, width=2, tags=tag)
         
-        self.canvas.create_text(x, y-8,
-            text=titulo,
-            font=("Arial", 11, "bold"),
-            fill="#e2e8f0",
-            tags=f"btn_{x}_{y}")
+        self.canvas.create_text(x, y-8, text=titulo, font=("Arial", 11, "bold"),
+            fill="#e2e8f0", tags=tag)
         
-        self.canvas.create_text(x, y+10,
-            text=descripcion,
-            font=("Arial", 8),
-            fill="#64748b",
-            tags=f"btn_{x}_{y}")
+        self.canvas.create_text(x, y+10, text=descripcion, font=("Arial", 8),
+            fill="#64748b", tags=tag)
         
-        self.canvas.tag_bind(f"btn_{x}_{y}", "<Button-1>", lambda e: comando())
-        self.canvas.tag_bind(f"btn_{x}_{y}", "<Enter>", 
-            lambda e: self.hover_boton_enter(rect_id, color))
-        self.canvas.tag_bind(f"btn_{x}_{y}", "<Leave>", 
-            lambda e: self.hover_boton_leave(rect_id, color))
-        
-        self.canvas.tag_bind(f"btn_{x}_{y}", "<Enter>", 
+        self.canvas.tag_bind(tag, "<Button-1>", lambda e: comando())
+        self.canvas.tag_bind(tag, "<Enter>", 
+            lambda e: self.canvas.itemconfig(rect_id, fill="#1e3a5f", width=3))
+        self.canvas.tag_bind(tag, "<Leave>", 
+            lambda e: self.canvas.itemconfig(rect_id, fill="#0f172a", width=2))
+        self.canvas.tag_bind(tag, "<Enter>", 
             lambda e: self.canvas.config(cursor="hand2"), add="+")
-        self.canvas.tag_bind(f"btn_{x}_{y}", "<Leave>", 
+        self.canvas.tag_bind(tag, "<Leave>", 
             lambda e: self.canvas.config(cursor=""), add="+")
     
-    def hover_boton_enter(self, rect_id, color):
-        self.canvas.itemconfig(rect_id, fill="#1e3a5f", width=3)
-    
-    def hover_boton_leave(self, rect_id, color):
-        self.canvas.itemconfig(rect_id, fill="#0f172a", width=2)
-    
     def mostrar_estadisticas_rapidas(self):
-        """Muestra estadísticas rápidas del sistema"""
-        query_productos = "SELECT COUNT(*) FROM producto WHERE activo = TRUE;"
-        productos = execute_query(query_productos, fetch=True)
-        num_productos = productos[0][0] if productos else 0
+        queries = {
+            'productos': "SELECT COUNT(*) FROM producto WHERE activo = TRUE;",
+            'mercados': "SELECT COUNT(*) FROM mercado WHERE activo = TRUE;",
+            'ofertas': "SELECT COUNT(*) FROM oferta;",
+            'precio': "SELECT AVG(precio) FROM oferta;"
+        }
         
-        query_mercados = "SELECT COUNT(*) FROM mercado WHERE activo = TRUE;"
-        mercados = execute_query(query_mercados, fetch=True)
-        num_mercados = mercados[0][0] if mercados else 0
+        stats = {}
+        for key, query in queries.items():
+            resultado = execute_query(query, fetch=True)
+            stats[key] = resultado[0][0] if resultado and resultado[0][0] else 0
         
-        query_ofertas = "SELECT COUNT(*) FROM oferta;"
-        ofertas = execute_query(query_ofertas, fetch=True)
-        num_ofertas = ofertas[0][0] if ofertas else 0
+        stats_text = (f"📊 Sistema: {int(stats['productos'])} productos | "
+                     f"{int(stats['mercados'])} mercados | "
+                     f"{int(stats['ofertas'])} ofertas registradas | "
+                     f"Precio promedio: {stats['precio']:.2f} Bs")
         
-        query_precio = "SELECT AVG(precio) FROM oferta;"
-        precio = execute_query(query_precio, fetch=True)
-        precio_prom = precio[0][0] if precio and precio[0][0] else 0
-        
-        stats_text = (f"📊 Sistema: {num_productos} productos | "
-                     f"{num_mercados} mercados | "
-                     f"{num_ofertas} ofertas registradas | "
-                     f"Precio promedio: {precio_prom:.2f} Bs")
-        
-        self.canvas.create_text(450, 520,
-            text=stats_text,
-            font=("Arial", 10),
-            fill="#94a3b8")
-    
-    # ========== FUNCIONES DE BÚSQUEDA ==========
+        self.canvas.create_text(450, 520, text=stats_text, font=("Arial", 10), fill="#94a3b8")
     
     def buscar_producto(self):
-        """Busca un producto y muestra todos sus precios"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Buscar Producto")
         ventana.geometry("800x500")
         ventana.configure(bg="#0a0f1e")
         ventana.transient(self.frame_principal)
         
-        tk.Label(ventana,
-            text="🛒 BUSCAR PRODUCTO",
-            font=("Arial", 14, "bold"),
+        tk.Label(ventana, text="🛒 BUSCAR PRODUCTO", font=("Arial", 14, "bold"),
             bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
         
         frame_busqueda = tk.Frame(ventana, bg="#1e293b")
         frame_busqueda.pack(fill=tk.X, padx=20, pady=10)
         
-        tk.Label(frame_busqueda,
-            text="Nombre del producto:",
-            font=("Arial", 10),
+        tk.Label(frame_busqueda, text="Nombre del producto:", font=("Arial", 10),
             bg="#1e293b", fg="#e2e8f0").pack(side=tk.LEFT, padx=10)
         
-        entry_buscar = tk.Entry(frame_busqueda,
-            font=("Arial", 10),
-            bg="#0f172a", fg="white",
-            width=30)
+        entry_buscar = tk.Entry(frame_busqueda, font=("Arial", 10),
+            bg="#0f172a", fg="white", width=30)
         entry_buscar.pack(side=tk.LEFT, padx=5)
         
         frame_resultados = tk.Frame(ventana, bg="#1e293b")
@@ -237,27 +136,21 @@ class GestionConsultas:
         scrollbar = ttk.Scrollbar(frame_resultados, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        tree = ttk.Treeview(frame_resultados,
-            columns=("Producto", "Mercado", "Precio", "Stock"),
-            show="headings",
+        columnas = ["Producto", "Mercado", "Precio", "Stock"]
+        anchos = np.array([250, 250, 100, 80])
+        
+        tree = ttk.Treeview(frame_resultados, columns=columnas, show="headings",
             yscrollcommand=scrollbar.set)
         scrollbar.config(command=tree.yview)
         
-        tree.heading("Producto", text="Producto")
-        tree.heading("Mercado", text="Mercado")
-        tree.heading("Precio", text="Precio (Bs)")
-        tree.heading("Stock", text="Stock")
-        
-        tree.column("Producto", width=250)
-        tree.column("Mercado", width=250)
-        tree.column("Precio", width=100, anchor="e")
-        tree.column("Stock", width=80, anchor="center")
+        anchors = ["w", "w", "e", "center"]
+        for col, ancho, anchor in zip(columnas, anchos, anchors):
+            tree.heading(col, text=col if col != "Precio" else "Precio (Bs)")
+            tree.column(col, width=int(ancho), anchor=anchor)
         
         tree.pack(fill=tk.BOTH, expand=True)
         
-        label_stats = tk.Label(ventana,
-            text="",
-            font=("Arial", 9),
+        label_stats = tk.Label(ventana, text="", font=("Arial", 9),
             bg="#0a0f1e", fg="#94a3b8")
         label_stats.pack(pady=5)
         
@@ -270,13 +163,8 @@ class GestionConsultas:
             tree.delete(*tree.get_children())
             
             query = """
-            SELECT 
-                p.nombre_producto,
-                p.unidad_medida,
-                m.nombre_mercado,
-                m.ciudad,
-                o.precio,
-                o.stock
+            SELECT p.nombre_producto, p.unidad_medida, m.nombre_mercado, m.ciudad,
+                   o.precio, o.stock
             FROM oferta o
             INNER JOIN producto p ON o.id_producto = p.id_producto
             INNER JOIN mercado m ON o.id_mercado = m.id_mercado
@@ -287,128 +175,105 @@ class GestionConsultas:
             resultados = execute_query(query, (f"%{termino}%",), fetch=True)
             
             if resultados:
-                for fila in resultados:
-                    producto = f"{fila[0]} ({fila[1]})"
-                    mercado = f"{fila[2]} - {fila[3]}" if fila[3] else fila[2]
-                    precio = f"{fila[4]:.2f}"
-                    stock = fila[5] if fila[5] else "N/A"
-                    
-                    tree.insert("", tk.END, values=(producto, mercado, precio, stock))
+                df = pd.DataFrame(resultados, 
+                    columns=['producto', 'unidad', 'mercado', 'ciudad', 'precio', 'stock'])
                 
-                precios = [float(fila[4]) for fila in resultados]
-                precio_min = min(precios)
-                precio_max = max(precios)
-                precio_prom = sum(precios) / len(precios)
+                df['producto_display'] = df['producto'] + ' (' + df['unidad'] + ')'
+                df['mercado_display'] = df.apply(
+                    lambda x: f"{x['mercado']} - {x['ciudad']}" if pd.notna(x['ciudad']) else x['mercado'],
+                    axis=1
+                )
+                df['precio_display'] = df['precio'].apply(lambda x: f"{x:.2f}")
+                df['stock_display'] = df['stock'].fillna("N/A")
                 
-                stats = (f"Se encontraron {len(resultados)} ofertas | "
-                        f"Precio mínimo: {precio_min:.2f} Bs | "
-                        f"Precio máximo: {precio_max:.2f} Bs | "
-                        f"Promedio: {precio_prom:.2f} Bs")
+                for _, row in df.iterrows():
+                    tree.insert("", tk.END, values=(
+                        row['producto_display'], row['mercado_display'],
+                        row['precio_display'], row['stock_display']
+                    ))
+                
+                precios = df['precio'].values
+                stats = (f"Se encontraron {len(df)} ofertas | "
+                        f"Precio mínimo: {np.min(precios):.2f} Bs | "
+                        f"Precio máximo: {np.max(precios):.2f} Bs | "
+                        f"Promedio: {np.mean(precios):.2f} Bs")
                 label_stats.config(text=stats, fg="#10b981")
             else:
-                label_stats.config(
-                    text=f"No se encontraron resultados para '{termino}'",
-                    fg="#f59e0b"
-                )
+                label_stats.config(text=f"No se encontraron resultados para '{termino}'", fg="#f59e0b")
         
-        btn_buscar = tk.Button(frame_busqueda,
-            text="🔍 Buscar",
-            font=("Arial", 10, "bold"),
-            bg="#10b981", fg="white",
-            command=ejecutar_busqueda,
-            padx=15, pady=5)
+        btn_buscar = tk.Button(frame_busqueda, text="🔍 Buscar",
+            font=("Arial", 10, "bold"), bg="#10b981", fg="white",
+            command=ejecutar_busqueda, padx=15, pady=5)
         btn_buscar.pack(side=tk.LEFT, padx=5)
         
         entry_buscar.bind("<Return>", lambda e: ejecutar_busqueda())
         
-        tk.Button(ventana,
-            text="Cerrar",
-            font=("Arial", 10),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(ventana, text="Cerrar", font=("Arial", 10),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=20, pady=5).pack(pady=10)
     
     def consultar_mercado(self):
-        """Muestra todos los productos de un mercado seleccionado"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Consultar Mercado")
         ventana.geometry("800x550")
         ventana.configure(bg="#0a0f1e")
         ventana.transient(self.frame_principal)
         
-        tk.Label(ventana,
-            text="🏪 CONSULTAR MERCADO",
-            font=("Arial", 14, "bold"),
+        tk.Label(ventana, text="🏪 CONSULTAR MERCADO", font=("Arial", 14, "bold"),
             bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
         
-        # Frame de selección
         frame_seleccion = tk.Frame(ventana, bg="#1e293b")
         frame_seleccion.pack(fill=tk.X, padx=20, pady=10)
         
-        tk.Label(frame_seleccion,
-            text="Seleccione un mercado:",
-            font=("Arial", 10),
+        tk.Label(frame_seleccion, text="Seleccione un mercado:", font=("Arial", 10),
             bg="#1e293b", fg="#e2e8f0").pack(side=tk.LEFT, padx=10)
         
-        # Cargar mercados
         query_mercados = """
         SELECT id_mercado, nombre_mercado, ciudad 
-        FROM mercado 
-        WHERE activo = TRUE 
-        ORDER BY nombre_mercado;
+        FROM mercado WHERE activo = TRUE ORDER BY nombre_mercado;
         """
         mercados = execute_query(query_mercados, fetch=True)
         
         if not mercados:
-            tk.Label(ventana,
-                text="⚠️ No hay mercados registrados",
-                font=("Arial", 11),
-                bg="#0a0f1e", fg="#f59e0b").pack(pady=20)
+            tk.Label(ventana, text="⚠️ No hay mercados registrados",
+                font=("Arial", 11), bg="#0a0f1e", fg="#f59e0b").pack(pady=20)
             tk.Button(ventana, text="Cerrar", command=ventana.destroy,
                      bg="#475569", fg="white", padx=20, pady=5).pack()
             return
         
-        mercados_dict = {f"{m[1]} - {m[2]}": m[0] for m in mercados}
+        df_mercados = pd.DataFrame(mercados, columns=['id', 'nombre', 'ciudad'])
+        df_mercados['display'] = df_mercados.apply(
+            lambda x: f"{x['nombre']} - {x['ciudad']}" if pd.notna(x['ciudad']) else x['nombre'],
+            axis=1
+        )
         
         combo_mercado = ttk.Combobox(frame_seleccion,
-            values=list(mercados_dict.keys()),
-            state="readonly",
-            font=("Arial", 10),
-            width=40)
+            values=df_mercados['display'].tolist(), state="readonly",
+            font=("Arial", 10), width=40)
         combo_mercado.pack(side=tk.LEFT, padx=5)
-        if mercados_dict:
-            combo_mercado.current(0)
+        combo_mercado.current(0)
         
-        # Frame para resultados
         frame_resultados = tk.Frame(ventana, bg="#1e293b")
         frame_resultados.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         scrollbar = ttk.Scrollbar(frame_resultados, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        tree = ttk.Treeview(frame_resultados,
-            columns=("Producto", "Categoría", "Precio", "Stock", "Última Actualización"),
-            show="headings",
+        columnas = ["Producto", "Categoría", "Precio", "Stock", "Última Actualización"]
+        anchos = np.array([200, 120, 100, 80, 150])
+        
+        tree = ttk.Treeview(frame_resultados, columns=columnas, show="headings",
             yscrollcommand=scrollbar.set)
         scrollbar.config(command=tree.yview)
         
-        tree.heading("Producto", text="Producto")
-        tree.heading("Categoría", text="Categoría")
-        tree.heading("Precio", text="Precio (Bs)")
-        tree.heading("Stock", text="Stock")
-        tree.heading("Última Actualización", text="Última Actualización")
-        
-        tree.column("Producto", width=200)
-        tree.column("Categoría", width=120)
-        tree.column("Precio", width=100, anchor="e")
-        tree.column("Stock", width=80, anchor="center")
-        tree.column("Última Actualización", width=150, anchor="center")
+        anchors = ["w", "w", "e", "center", "center"]
+        for col, ancho, anchor in zip(columnas, anchos, anchors):
+            tree.heading(col, text=col if col != "Precio" else "Precio (Bs)")
+            tree.column(col, width=int(ancho), anchor=anchor)
         
         tree.pack(fill=tk.BOTH, expand=True)
         
-        label_stats = tk.Label(ventana,
-            text="",
-            font=("Arial", 9),
+        label_stats = tk.Label(ventana, text="", font=("Arial", 9),
             bg="#0a0f1e", fg="#94a3b8")
         label_stats.pack(pady=5)
         
@@ -418,17 +283,13 @@ class GestionConsultas:
                 messagebox.showwarning("Advertencia", "Seleccione un mercado")
                 return
             
-            id_mercado = mercados_dict[seleccion]
+            match = df_mercados[df_mercados['display'] == seleccion]
+            id_mercado = int(match.iloc[0]['id'])
             tree.delete(*tree.get_children())
             
             query = """
-            SELECT 
-                p.nombre_producto,
-                p.unidad_medida,
-                p.categoria,
-                o.precio,
-                o.stock,
-                o.fecha_actualizacion
+            SELECT p.nombre_producto, p.unidad_medida, p.categoria,
+                   o.precio, o.stock, o.fecha_actualizacion
             FROM oferta o
             INNER JOIN producto p ON o.id_producto = p.id_producto
             WHERE o.id_mercado = %s
@@ -438,115 +299,93 @@ class GestionConsultas:
             resultados = execute_query(query, (id_mercado,), fetch=True)
             
             if resultados:
-                for fila in resultados:
-                    producto = f"{fila[0]} ({fila[1]})"
-                    categoria = fila[2] if fila[2] else "Sin categoría"
-                    precio = f"{fila[3]:.2f}"
-                    stock = fila[4] if fila[4] else "N/A"
-                    fecha = fila[5].strftime("%d/%m/%Y %H:%M") if fila[5] else "N/A"
-                    
-                    tree.insert("", tk.END, values=(producto, categoria, precio, stock, fecha))
+                df = pd.DataFrame(resultados,
+                    columns=['producto', 'unidad', 'categoria', 'precio', 'stock', 'fecha'])
                 
-                precios = [float(fila[3]) for fila in resultados]
-                total_productos = len(resultados)
-                precio_prom = sum(precios) / len(precios)
+                df['producto_display'] = df['producto'] + ' (' + df['unidad'] + ')'
+                df['categoria_display'] = df['categoria'].fillna("Sin categoría")
+                df['precio_display'] = df['precio'].apply(lambda x: f"{x:.2f}")
+                df['stock_display'] = df['stock'].fillna("N/A")
+                df['fecha_display'] = df['fecha'].apply(
+                    lambda x: x.strftime("%d/%m/%Y %H:%M") if pd.notna(x) else "N/A"
+                )
                 
-                stats = (f"Total: {total_productos} productos | "
-                        f"Precio promedio: {precio_prom:.2f} Bs")
+                for _, row in df.iterrows():
+                    tree.insert("", tk.END, values=(
+                        row['producto_display'], row['categoria_display'],
+                        row['precio_display'], row['stock_display'], row['fecha_display']
+                    ))
+                
+                precio_prom = np.mean(df['precio'].values)
+                stats = f"Total: {len(df)} productos | Precio promedio: {precio_prom:.2f} Bs"
                 label_stats.config(text=stats, fg="#10b981")
             else:
-                label_stats.config(
-                    text="Este mercado no tiene productos registrados",
-                    fg="#f59e0b"
-                )
+                label_stats.config(text="Este mercado no tiene productos registrados", fg="#f59e0b")
         
-        btn_consultar = tk.Button(frame_seleccion,
-            text="🔍 Consultar",
-            font=("Arial", 10, "bold"),
-            bg="#8b5cf6", fg="white",
-            command=consultar,
-            padx=15, pady=5)
+        btn_consultar = tk.Button(frame_seleccion, text="🔍 Consultar",
+            font=("Arial", 10, "bold"), bg="#8b5cf6", fg="white",
+            command=consultar, padx=15, pady=5)
         btn_consultar.pack(side=tk.LEFT, padx=5)
         
-        # Cargar automáticamente el primer mercado
         consultar()
         
-        tk.Button(ventana,
-            text="Cerrar",
-            font=("Arial", 10),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(ventana, text="Cerrar", font=("Arial", 10),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=20, pady=5).pack(pady=10)
-    
     def filtrar_por_precio(self):
-        """Filtra ofertas por rango de precio"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Filtrar por Precio")
         ventana.geometry("800x550")
         ventana.configure(bg="#0a0f1e")
         ventana.transient(self.frame_principal)
         
-        tk.Label(ventana,
-            text="💰 FILTRAR POR RANGO DE PRECIO",
-            font=("Arial", 14, "bold"),
-            bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
+        tk.Label(ventana, text="💰 FILTRAR POR RANGO DE PRECIO",
+            font=("Arial", 14, "bold"), bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
         
-        # Frame de filtros
         frame_filtros = tk.Frame(ventana, bg="#1e293b")
         frame_filtros.pack(fill=tk.X, padx=20, pady=10)
         
-        tk.Label(frame_filtros,
-            text="Precio mínimo (Bs):",
-            font=("Arial", 10),
-            bg="#1e293b", fg="#e2e8f0").grid(row=0, column=0, padx=10, pady=5, sticky="e")
+        labels_config = np.array([
+            ["Precio mínimo (Bs):", 0, 0],
+            ["Precio máximo (Bs):", 0, 2]
+        ], dtype=object)
         
-        entry_min = tk.Entry(frame_filtros,
-            font=("Arial", 10),
-            bg="#0f172a", fg="white",
-            width=15)
+        for texto, row, col in labels_config:
+            tk.Label(frame_filtros, text=texto, font=("Arial", 10),
+                bg="#1e293b", fg="#e2e8f0").grid(row=int(row), column=int(col), 
+                padx=10, pady=5, sticky="e")
+        
+        entry_min = tk.Entry(frame_filtros, font=("Arial", 10),
+            bg="#0f172a", fg="white", width=15)
         entry_min.grid(row=0, column=1, padx=5, pady=5)
         entry_min.insert(0, "0")
         
-        tk.Label(frame_filtros,
-            text="Precio máximo (Bs):",
-            font=("Arial", 10),
-            bg="#1e293b", fg="#e2e8f0").grid(row=0, column=2, padx=10, pady=5, sticky="e")
-        
-        entry_max = tk.Entry(frame_filtros,
-            font=("Arial", 10),
-            bg="#0f172a", fg="white",
-            width=15)
+        entry_max = tk.Entry(frame_filtros, font=("Arial", 10),
+            bg="#0f172a", fg="white", width=15)
         entry_max.grid(row=0, column=3, padx=5, pady=5)
         entry_max.insert(0, "1000")
         
-        # Frame para resultados
         frame_resultados = tk.Frame(ventana, bg="#1e293b")
         frame_resultados.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         scrollbar = ttk.Scrollbar(frame_resultados, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        tree = ttk.Treeview(frame_resultados,
-            columns=("Producto", "Mercado", "Precio", "Stock"),
-            show="headings",
+        columnas = ["Producto", "Mercado", "Precio", "Stock"]
+        anchos = np.array([250, 250, 120, 100])
+        
+        tree = ttk.Treeview(frame_resultados, columns=columnas, show="headings",
             yscrollcommand=scrollbar.set)
         scrollbar.config(command=tree.yview)
         
-        tree.heading("Producto", text="Producto")
-        tree.heading("Mercado", text="Mercado")
-        tree.heading("Precio", text="Precio (Bs)")
-        tree.heading("Stock", text="Stock")
-        
-        tree.column("Producto", width=250)
-        tree.column("Mercado", width=250)
-        tree.column("Precio", width=120, anchor="e")
-        tree.column("Stock", width=100, anchor="center")
+        anchors = ["w", "w", "e", "center"]
+        for col, ancho, anchor in zip(columnas, anchos, anchors):
+            tree.heading(col, text=col if col != "Precio" else "Precio (Bs)")
+            tree.column(col, width=int(ancho), anchor=anchor)
         
         tree.pack(fill=tk.BOTH, expand=True)
         
-        label_stats = tk.Label(ventana,
-            text="",
-            font=("Arial", 9),
+        label_stats = tk.Label(ventana, text="", font=("Arial", 9),
             bg="#0a0f1e", fg="#94a3b8")
         label_stats.pack(pady=5)
         
@@ -571,13 +410,8 @@ class GestionConsultas:
             tree.delete(*tree.get_children())
             
             query = """
-            SELECT 
-                p.nombre_producto,
-                p.unidad_medida,
-                m.nombre_mercado,
-                m.ciudad,
-                o.precio,
-                o.stock
+            SELECT p.nombre_producto, p.unidad_medida, m.nombre_mercado, m.ciudad,
+                   o.precio, o.stock
             FROM oferta o
             INNER JOIN producto p ON o.id_producto = p.id_producto
             INNER JOIN mercado m ON o.id_mercado = m.id_mercado
@@ -588,238 +422,148 @@ class GestionConsultas:
             resultados = execute_query(query, (precio_min, precio_max), fetch=True)
             
             if resultados:
-                for fila in resultados:
-                    producto = f"{fila[0]} ({fila[1]})"
-                    mercado = f"{fila[2]} - {fila[3]}" if fila[3] else fila[2]
-                    precio = f"{fila[4]:.2f}"
-                    stock = fila[5] if fila[5] else "N/A"
-                    
-                    tree.insert("", tk.END, values=(producto, mercado, precio, stock))
+                df = pd.DataFrame(resultados,
+                    columns=['producto', 'unidad', 'mercado', 'ciudad', 'precio', 'stock'])
                 
-                stats = (f"Se encontraron {len(resultados)} ofertas entre "
+                df['producto_display'] = df['producto'] + ' (' + df['unidad'] + ')'
+                df['mercado_display'] = df.apply(
+                    lambda x: f"{x['mercado']} - {x['ciudad']}" if pd.notna(x['ciudad']) else x['mercado'],
+                    axis=1
+                )
+                df['precio_display'] = df['precio'].apply(lambda x: f"{x:.2f}")
+                df['stock_display'] = df['stock'].fillna("N/A")
+                
+                for _, row in df.iterrows():
+                    tree.insert("", tk.END, values=(
+                        row['producto_display'], row['mercado_display'],
+                        row['precio_display'], row['stock_display']
+                    ))
+                
+                stats = (f"Se encontraron {len(df)} ofertas entre "
                         f"{precio_min:.2f} Bs y {precio_max:.2f} Bs")
                 label_stats.config(text=stats, fg="#10b981")
             else:
                 label_stats.config(
-                    text=f"No se encontraron ofertas en el rango especificado",
-                    fg="#f59e0b"
-                )
+                    text=f"No se encontraron ofertas en el rango especificado", fg="#f59e0b")
         
-        btn_filtrar = tk.Button(frame_filtros,
-            text="🔍 Filtrar",
-            font=("Arial", 10, "bold"),
-            bg="#f59e0b", fg="white",
-            command=filtrar,
-            padx=20, pady=5)
+        btn_filtrar = tk.Button(frame_filtros, text="🔍 Filtrar",
+            font=("Arial", 10, "bold"), bg="#f59e0b", fg="white",
+            command=filtrar, padx=20, pady=5)
         btn_filtrar.grid(row=0, column=4, padx=10, pady=5)
         
-        # Filtrar automáticamente al iniciar
         filtrar()
         
-        tk.Button(ventana,
-            text="Cerrar",
-            font=("Arial", 10),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(ventana, text="Cerrar", font=("Arial", 10),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=20, pady=5).pack(pady=10)
     
     def ver_rankings(self):
-        """Muestra rankings de productos (más caros/baratos)"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Rankings de Productos")
         ventana.geometry("900x600")
         ventana.configure(bg="#0a0f1e")
         ventana.transient(self.frame_principal)
         
-        tk.Label(ventana,
-            text="🏆 RANKINGS DE PRODUCTOS",
-            font=("Arial", 16, "bold"),
-            bg="#0a0f1e", fg="#e2e8f0").pack(pady=15)
+        tk.Label(ventana, text="🏆 RANKINGS DE PRODUCTOS",
+            font=("Arial", 16, "bold"), bg="#0a0f1e", fg="#e2e8f0").pack(pady=15)
         
-        # Frame principal con dos columnas
         frame_rankings = tk.Frame(ventana, bg="#0a0f1e")
         frame_rankings.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
-        # === COLUMNA IZQUIERDA: MÁS CAROS ===
-        frame_caros = tk.Frame(frame_rankings, bg="#1e293b")
-        frame_caros.grid(row=0, column=0, padx=10, sticky="nsew")
+        rankings_config = [
+            ("caros", "🔴 TOP 10 PRODUCTOS MÁS CAROS", "#dc2626", "DESC"),
+            ("baratos", "🟢 TOP 10 PRODUCTOS MÁS BARATOS", "#10b981", "ASC")
+        ]
         
-        tk.Label(frame_caros,
-            text="🔴 TOP 10 PRODUCTOS MÁS CAROS",
-            font=("Arial", 12, "bold"),
-            bg="#1e293b", fg="#dc2626").pack(pady=10)
+        for idx, (key, titulo, color, orden) in enumerate(rankings_config):
+            frame = tk.Frame(frame_rankings, bg="#1e293b")
+            frame.grid(row=0, column=idx, padx=10, sticky="nsew")
+            
+            tk.Label(frame, text=titulo, font=("Arial", 12, "bold"),
+                bg="#1e293b", fg=color).pack(pady=10)
+            
+            scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            
+            columnas = ["Pos", "Producto", "Precio"]
+            anchos = np.array([40, 250, 100])
+            
+            tree = ttk.Treeview(frame, columns=columnas, show="headings",
+                height=15, yscrollcommand=scrollbar.set)
+            scrollbar.config(command=tree.yview)
+            
+            anchors = ["center", "w", "e"]
+            for col, ancho, anchor in zip(columnas, anchos, anchors):
+                tree.heading(col, text="#" if col == "Pos" else col if col != "Precio" else "Precio (Bs)")
+                tree.column(col, width=int(ancho), anchor=anchor)
+            
+            tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+            
+            query = f"""
+            SELECT p.nombre_producto, p.unidad_medida, m.nombre_mercado, o.precio
+            FROM oferta o
+            INNER JOIN producto p ON o.id_producto = p.id_producto
+            INNER JOIN mercado m ON o.id_mercado = m.id_mercado
+            ORDER BY o.precio {orden}
+            LIMIT 10;
+            """
+            
+            resultados = execute_query(query, fetch=True)
+            
+            if resultados:
+                df = pd.DataFrame(resultados, columns=['producto', 'unidad', 'mercado', 'precio'])
+                df['producto_display'] = (df['producto'] + ' (' + df['unidad'] + 
+                                         ') - ' + df['mercado'])
+                df['precio_display'] = df['precio'].apply(lambda x: f"{x:.2f}")
+                
+                for i, row in df.iterrows():
+                    tree.insert("", tk.END, values=(i+1, row['producto_display'], row['precio_display']))
         
-        scrollbar_caros = ttk.Scrollbar(frame_caros, orient=tk.VERTICAL)
-        scrollbar_caros.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        tree_caros = ttk.Treeview(frame_caros,
-            columns=("Pos", "Producto", "Precio"),
-            show="headings",
-            height=15,
-            yscrollcommand=scrollbar_caros.set)
-        scrollbar_caros.config(command=tree_caros.yview)
-        
-        tree_caros.heading("Pos", text="#")
-        tree_caros.heading("Producto", text="Producto")
-        tree_caros.heading("Precio", text="Precio (Bs)")
-        
-        tree_caros.column("Pos", width=40, anchor="center")
-        tree_caros.column("Producto", width=250)
-        tree_caros.column("Precio", width=100, anchor="e")
-        
-        tree_caros.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
-        # === COLUMNA DERECHA: MÁS BARATOS ===
-        frame_baratos = tk.Frame(frame_rankings, bg="#1e293b")
-        frame_baratos.grid(row=0, column=1, padx=10, sticky="nsew")
-        
-        tk.Label(frame_baratos,
-            text="🟢 TOP 10 PRODUCTOS MÁS BARATOS",
-            font=("Arial", 12, "bold"),
-            bg="#1e293b", fg="#10b981").pack(pady=10)
-        
-        scrollbar_baratos = ttk.Scrollbar(frame_baratos, orient=tk.VERTICAL)
-        scrollbar_baratos.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        tree_baratos = ttk.Treeview(frame_baratos,
-            columns=("Pos", "Producto", "Precio"),
-            show="headings",
-            height=15,
-            yscrollcommand=scrollbar_baratos.set)
-        scrollbar_baratos.config(command=tree_baratos.yview)
-        
-        tree_baratos.heading("Pos", text="#")
-        tree_baratos.heading("Producto", text="Producto")
-        tree_baratos.heading("Precio", text="Precio (Bs)")
-        
-        tree_baratos.column("Pos", width=40, anchor="center")
-        tree_baratos.column("Producto", width=250)
-        tree_baratos.column("Precio", width=100, anchor="e")
-        
-        tree_baratos.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
-        # Configurar grid para que se expanda
         frame_rankings.grid_columnconfigure(0, weight=1)
         frame_rankings.grid_columnconfigure(1, weight=1)
         frame_rankings.grid_rowconfigure(0, weight=1)
         
-        # Cargar datos
-        # MÁS CAROS
-        query_caros = """
-        SELECT 
-            p.nombre_producto,
-            p.unidad_medida,
-            m.nombre_mercado,
-            o.precio
-        FROM oferta o
-        INNER JOIN producto p ON o.id_producto = p.id_producto
-        INNER JOIN mercado m ON o.id_mercado = m.id_mercado
-        ORDER BY o.precio DESC
-        LIMIT 10;
-        """
-        
-        resultados_caros = execute_query(query_caros, fetch=True)
-        
-        if resultados_caros:
-            for i, fila in enumerate(resultados_caros, 1):
-                producto = f"{fila[0]} ({fila[1]}) - {fila[2]}"
-                precio = f"{fila[3]:.2f}"
-                tree_caros.insert("", tk.END, values=(i, producto, precio))
-        
-        # MÁS BARATOS
-        query_baratos = """
-        SELECT 
-            p.nombre_producto,
-            p.unidad_medida,
-            m.nombre_mercado,
-            o.precio
-        FROM oferta o
-        INNER JOIN producto p ON o.id_producto = p.id_producto
-        INNER JOIN mercado m ON o.id_mercado = m.id_mercado
-        ORDER BY o.precio ASC
-        LIMIT 10;
-        """
-        
-        resultados_baratos = execute_query(query_baratos, fetch=True)
-        
-        if resultados_baratos:
-            for i, fila in enumerate(resultados_baratos, 1):
-                producto = f"{fila[0]} ({fila[1]}) - {fila[2]}"
-                precio = f"{fila[3]:.2f}"
-                tree_baratos.insert("", tk.END, values=(i, producto, precio))
-        
-        # Botón cerrar
-        tk.Button(ventana,
-            text="Cerrar",
-            font=("Arial", 11, "bold"),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(ventana, text="Cerrar", font=("Arial", 11, "bold"),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=30, pady=8).pack(pady=15)
     
-    # ========== FUNCIONES DE REPORTES ==========
-    
     def reporte_general(self):
-        """Genera reporte general de todos los productos con sus precios"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Reporte General")
         ventana.geometry("1000x600")
         ventana.configure(bg="#0a0f1e")
         ventana.transient(self.frame_principal)
         
-        tk.Label(ventana,
-            text="📄 REPORTE GENERAL DE PRODUCTOS",
-            font=("Arial", 14, "bold"),
-            bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
+        tk.Label(ventana, text="📄 REPORTE GENERAL DE PRODUCTOS",
+            font=("Arial", 14, "bold"), bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
         
-        # Frame para tabla
         frame_tabla = tk.Frame(ventana, bg="#1e293b")
         frame_tabla.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         scrollbar = ttk.Scrollbar(frame_tabla, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        tree = ttk.Treeview(frame_tabla,
-            columns=("Producto", "Categoría", "Mercado", "Ciudad", "Precio", "Stock", "Fecha"),
-            show="headings",
+        columnas = ["Producto", "Categoría", "Mercado", "Ciudad", "Precio", "Stock", "Fecha"]
+        anchos = np.array([180, 100, 150, 100, 90, 70, 140])
+        
+        tree = ttk.Treeview(frame_tabla, columns=columnas, show="headings",
             yscrollcommand=scrollbar.set)
         scrollbar.config(command=tree.yview)
         
-        tree.heading("Producto", text="Producto")
-        tree.heading("Categoría", text="Categoría")
-        tree.heading("Mercado", text="Mercado")
-        tree.heading("Ciudad", text="Ciudad")
-        tree.heading("Precio", text="Precio (Bs)")
-        tree.heading("Stock", text="Stock")
-        tree.heading("Fecha", text="Última Actualización")
-        
-        tree.column("Producto", width=180)
-        tree.column("Categoría", width=100)
-        tree.column("Mercado", width=150)
-        tree.column("Ciudad", width=100)
-        tree.column("Precio", width=90, anchor="e")
-        tree.column("Stock", width=70, anchor="center")
-        tree.column("Fecha", width=140, anchor="center")
+        anchors = ["w", "w", "w", "w", "e", "center", "center"]
+        for col, ancho, anchor in zip(columnas, anchos, anchors):
+            tree.heading(col, text=col if col != "Precio" else "Precio (Bs)")
+            tree.column(col, width=int(ancho), anchor=anchor)
         
         tree.pack(fill=tk.BOTH, expand=True)
         
-        # Label de estadísticas
-        label_stats = tk.Label(ventana,
-            text="Cargando datos...",
-            font=("Arial", 9),
-            bg="#0a0f1e", fg="#94a3b8")
+        label_stats = tk.Label(ventana, text="Cargando datos...",
+            font=("Arial", 9), bg="#0a0f1e", fg="#94a3b8")
         label_stats.pack(pady=5)
         
-        # Consultar todos los datos
         query = """
-        SELECT 
-            p.nombre_producto,
-            p.unidad_medida,
-            p.categoria,
-            m.nombre_mercado,
-            m.ciudad,
-            o.precio,
-            o.stock,
-            o.fecha_actualizacion
+        SELECT p.nombre_producto, p.unidad_medida, p.categoria,
+               m.nombre_mercado, m.ciudad, o.precio, o.stock, o.fecha_actualizacion
         FROM oferta o
         INNER JOIN producto p ON o.id_producto = p.id_producto
         INNER JOIN mercado m ON o.id_mercado = m.id_mercado
@@ -829,142 +573,127 @@ class GestionConsultas:
         resultados = execute_query(query, fetch=True)
         
         if resultados:
-            for fila in resultados:
-                producto = f"{fila[0]} ({fila[1]})"
-                categoria = fila[2] if fila[2] else "Sin categoría"
-                mercado = fila[3]
-                ciudad = fila[4] if fila[4] else "N/A"
-                precio = f"{fila[5]:.2f}"
-                stock = fila[6] if fila[6] else "N/A"
-                fecha = fila[7].strftime("%d/%m/%Y %H:%M") if fila[7] else "N/A"
-                
-                tree.insert("", tk.END, values=(producto, categoria, mercado, ciudad, precio, stock, fecha))
+            df = pd.DataFrame(resultados,
+                columns=['producto', 'unidad', 'categoria', 'mercado', 'ciudad', 
+                        'precio', 'stock', 'fecha'])
             
-            total_registros = len(resultados)
-            precios = [float(fila[5]) for fila in resultados]
-            precio_prom = sum(precios) / len(precios)
-            precio_min = min(precios)
-            precio_max = max(precios)
+            df['producto_display'] = df['producto'] + ' (' + df['unidad'] + ')'
+            df['categoria_display'] = df['categoria'].fillna("Sin categoría")
+            df['ciudad_display'] = df['ciudad'].fillna("N/A")
+            df['precio_display'] = df['precio'].apply(lambda x: f"{x:.2f}")
+            df['stock_display'] = df['stock'].fillna("N/A")
+            df['fecha_display'] = df['fecha'].apply(
+                lambda x: x.strftime("%d/%m/%Y %H:%M") if pd.notna(x) else "N/A"
+            )
             
-            stats = (f"Total: {total_registros} registros | "
-                    f"Promedio: {precio_prom:.2f} Bs | "
-                    f"Mín: {precio_min:.2f} Bs | "
-                    f"Máx: {precio_max:.2f} Bs")
+            for _, row in df.iterrows():
+                tree.insert("", tk.END, values=(
+                    row['producto_display'], row['categoria_display'], row['mercado'],
+                    row['ciudad_display'], row['precio_display'], 
+                    row['stock_display'], row['fecha_display']
+                ))
+            
+            precios = df['precio'].values
+            stats = (f"Total: {len(df)} registros | "
+                    f"Promedio: {np.mean(precios):.2f} Bs | "
+                    f"Mín: {np.min(precios):.2f} Bs | "
+                    f"Máx: {np.max(precios):.2f} Bs")
             label_stats.config(text=stats, fg="#10b981")
         else:
             label_stats.config(text="No hay datos para mostrar", fg="#f59e0b")
         
-        # Botones
         frame_botones = tk.Frame(ventana, bg="#0a0f1e")
         frame_botones.pack(pady=10)
         
-        tk.Button(frame_botones,
-            text="💾 Exportar a CSV",
-            font=("Arial", 10, "bold"),
-            bg="#10b981", fg="white",
+        tk.Button(frame_botones, text="💾 Exportar a CSV",
+            font=("Arial", 10, "bold"), bg="#10b981", fg="white",
             command=lambda: self.exportar_tabla_csv(resultados, "reporte_general"),
             padx=15, pady=6).pack(side=tk.LEFT, padx=5)
         
-        tk.Button(frame_botones,
-            text="Cerrar",
-            font=("Arial", 10),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(frame_botones, text="Cerrar", font=("Arial", 10),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=20, pady=6).pack(side=tk.LEFT, padx=5)
-    
     def comparar_mercados(self):
-        """Compara precios entre dos mercados seleccionados"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Comparar Mercados")
         ventana.geometry("1000x650")
         ventana.configure(bg="#0a0f1e")
         ventana.transient(self.frame_principal)
         
-        tk.Label(ventana,
-            text="📈 COMPARAR PRECIOS ENTRE MERCADOS",
-            font=("Arial", 14, "bold"),
-            bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
+        tk.Label(ventana, text="📈 COMPARAR PRECIOS ENTRE MERCADOS",
+            font=("Arial", 14, "bold"), bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
         
-        # Frame de selección
         frame_seleccion = tk.Frame(ventana, bg="#1e293b")
         frame_seleccion.pack(fill=tk.X, padx=20, pady=10)
         
-        # Cargar mercados
         query_mercados = """
         SELECT id_mercado, nombre_mercado, ciudad 
-        FROM mercado 
-        WHERE activo = TRUE 
-        ORDER BY nombre_mercado;
+        FROM mercado WHERE activo = TRUE ORDER BY nombre_mercado;
         """
         mercados = execute_query(query_mercados, fetch=True)
         
         if not mercados or len(mercados) < 2:
-            tk.Label(ventana,
-                text="⚠️ Se necesitan al menos 2 mercados registrados para comparar",
-                font=("Arial", 11),
-                bg="#0a0f1e", fg="#f59e0b").pack(pady=20)
+            tk.Label(ventana, text="⚠️ Se necesitan al menos 2 mercados registrados para comparar",
+                font=("Arial", 11), bg="#0a0f1e", fg="#f59e0b").pack(pady=20)
             tk.Button(ventana, text="Cerrar", command=ventana.destroy,
                      bg="#475569", fg="white", padx=20, pady=5).pack()
             return
         
-        mercados_dict = {f"{m[1]} - {m[2]}": m[0] for m in mercados}
+        df_mercados = pd.DataFrame(mercados, columns=['id', 'nombre', 'ciudad'])
+        df_mercados['display'] = df_mercados.apply(
+            lambda x: f"{x['nombre']} - {x['ciudad']}" if pd.notna(x['ciudad']) else x['nombre'],
+            axis=1
+        )
         
-        tk.Label(frame_seleccion,
-            text="Mercado 1:",
-            font=("Arial", 10, "bold"),
-            bg="#1e293b", fg="#e2e8f0").grid(row=0, column=0, padx=10, pady=5, sticky="e")
+        labels_config = np.array([
+            ["Mercado 1:", 0, 0],
+            ["Mercado 2:", 0, 2]
+        ], dtype=object)
+        
+        for texto, row, col in labels_config:
+            tk.Label(frame_seleccion, text=texto, font=("Arial", 10, "bold"),
+                bg="#1e293b", fg="#e2e8f0").grid(row=int(row), column=int(col), 
+                padx=10, pady=5, sticky="e")
         
         combo_mercado1 = ttk.Combobox(frame_seleccion,
-            values=list(mercados_dict.keys()),
-            state="readonly",
-            font=("Arial", 10),
-            width=35)
+            values=df_mercados['display'].tolist(), state="readonly",
+            font=("Arial", 10), width=35)
         combo_mercado1.grid(row=0, column=1, padx=5, pady=5)
-        if mercados_dict:
-            combo_mercado1.current(0)
-        
-        tk.Label(frame_seleccion,
-            text="Mercado 2:",
-            font=("Arial", 10, "bold"),
-            bg="#1e293b", fg="#e2e8f0").grid(row=0, column=2, padx=10, pady=5, sticky="e")
+        combo_mercado1.current(0)
         
         combo_mercado2 = ttk.Combobox(frame_seleccion,
-            values=list(mercados_dict.keys()),
-            state="readonly",
-            font=("Arial", 10),
-            width=35)
+            values=df_mercados['display'].tolist(), state="readonly",
+            font=("Arial", 10), width=35)
         combo_mercado2.grid(row=0, column=3, padx=5, pady=5)
-        if len(mercados_dict) > 1:
+        if len(df_mercados) > 1:
             combo_mercado2.current(1)
         
-        # Frame para resultados
         frame_resultados = tk.Frame(ventana, bg="#1e293b")
         frame_resultados.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         scrollbar = ttk.Scrollbar(frame_resultados, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        tree = ttk.Treeview(frame_resultados,
-            columns=("Producto", "Mercado1", "Mercado2", "Diferencia"),
-            show="headings",
+        columnas = ["Producto", "Mercado1", "Mercado2", "Diferencia"]
+        anchos = np.array([300, 150, 150, 200])
+        
+        tree = ttk.Treeview(frame_resultados, columns=columnas, show="headings",
             yscrollcommand=scrollbar.set)
         scrollbar.config(command=tree.yview)
         
-        tree.heading("Producto", text="Producto")
-        tree.heading("Mercado1", text="Mercado 1 (Bs)")
-        tree.heading("Mercado2", text="Mercado 2 (Bs)")
-        tree.heading("Diferencia", text="Diferencia")
-        
-        tree.column("Producto", width=300)
-        tree.column("Mercado1", width=150, anchor="e")
-        tree.column("Mercado2", width=150, anchor="e")
-        tree.column("Diferencia", width=200, anchor="center")
+        anchors = ["w", "e", "e", "center"]
+        for col, ancho, anchor in zip(columnas, anchos, anchors):
+            texto = col
+            if col == "Mercado1":
+                texto = "Mercado 1 (Bs)"
+            elif col == "Mercado2":
+                texto = "Mercado 2 (Bs)"
+            tree.heading(col, text=texto)
+            tree.column(col, width=int(ancho), anchor=anchor)
         
         tree.pack(fill=tk.BOTH, expand=True)
         
-        label_stats = tk.Label(ventana,
-            text="",
-            font=("Arial", 9),
+        label_stats = tk.Label(ventana, text="", font=("Arial", 9),
             bg="#0a0f1e", fg="#94a3b8")
         label_stats.pack(pady=5)
         
@@ -980,17 +709,16 @@ class GestionConsultas:
                 messagebox.showwarning("Advertencia", "Seleccione mercados diferentes")
                 return
             
-            id_mercado1 = mercados_dict[sel1]
-            id_mercado2 = mercados_dict[sel2]
+            match1 = df_mercados[df_mercados['display'] == sel1]
+            match2 = df_mercados[df_mercados['display'] == sel2]
+            id_mercado1 = int(match1.iloc[0]['id'])
+            id_mercado2 = int(match2.iloc[0]['id'])
             
             tree.delete(*tree.get_children())
             
             query = """
-            SELECT 
-                p.nombre_producto,
-                p.unidad_medida,
-                o1.precio as precio_m1,
-                o2.precio as precio_m2
+            SELECT p.nombre_producto, p.unidad_medida,
+                   o1.precio as precio_m1, o2.precio as precio_m2
             FROM producto p
             LEFT JOIN oferta o1 ON p.id_producto = o1.id_producto AND o1.id_mercado = %s
             LEFT JOIN oferta o2 ON p.id_producto = o2.id_producto AND o2.id_mercado = %s
@@ -1001,16 +729,19 @@ class GestionConsultas:
             resultados = execute_query(query, (id_mercado1, id_mercado2), fetch=True)
             
             if resultados:
-                total_diferencia = 0
+                df = pd.DataFrame(resultados, columns=['producto', 'unidad', 'precio_m1', 'precio_m2'])
+                df['producto_display'] = df['producto'] + ' (' + df['unidad'] + ')'
+                df['precio_m1'] = pd.to_numeric(df['precio_m1'])
+                df['precio_m2'] = pd.to_numeric(df['precio_m2'])
+                df['diferencia'] = df['precio_m2'] - df['precio_m1']
+                
                 mercado1_mas_barato = 0
                 mercado2_mas_barato = 0
                 
-                for fila in resultados:
-                    producto = f"{fila[0]} ({fila[1]})"
-                    precio_m1 = float(fila[2])
-                    precio_m2 = float(fila[3])
-                    diferencia = precio_m2 - precio_m1
-                    total_diferencia += abs(diferencia)
+                for _, row in df.iterrows():
+                    precio_m1 = row['precio_m1']
+                    precio_m2 = row['precio_m2']
+                    diferencia = row['diferencia']
                     
                     if precio_m1 < precio_m2:
                         mercado1_mas_barato += 1
@@ -1025,70 +756,51 @@ class GestionConsultas:
                         tag = "igual"
                     
                     tree.insert("", tk.END, values=(
-                        producto,
-                        f"{precio_m1:.2f}",
-                        f"{precio_m2:.2f}",
-                        dif_texto
+                        row['producto_display'], f"{precio_m1:.2f}",
+                        f"{precio_m2:.2f}", dif_texto
                     ), tags=(tag,))
                 
-                # Aplicar colores
                 tree.tag_configure("mas_barato_m1", foreground="#10b981")
                 tree.tag_configure("mas_barato_m2", foreground="#3b82f6")
                 tree.tag_configure("igual", foreground="#94a3b8")
                 
-                promedio_dif = total_diferencia / len(resultados)
-                stats = (f"Productos comparados: {len(resultados)} | "
+                promedio_dif = np.mean(np.abs(df['diferencia'].values))
+                stats = (f"Productos comparados: {len(df)} | "
                         f"M1 más barato: {mercado1_mas_barato} | "
                         f"M2 más barato: {mercado2_mas_barato} | "
                         f"Diferencia promedio: {promedio_dif:.2f} Bs")
                 label_stats.config(text=stats, fg="#10b981")
             else:
                 label_stats.config(
-                    text="No hay productos en común entre ambos mercados",
-                    fg="#f59e0b"
-                )
+                    text="No hay productos en común entre ambos mercados", fg="#f59e0b")
         
-        btn_comparar = tk.Button(frame_seleccion,
-            text="🔍 Comparar",
-            font=("Arial", 10, "bold"),
-            bg="#06b6d4", fg="white",
-            command=comparar,
-            padx=20, pady=5)
+        btn_comparar = tk.Button(frame_seleccion, text="🔍 Comparar",
+            font=("Arial", 10, "bold"), bg="#06b6d4", fg="white",
+            command=comparar, padx=20, pady=5)
         btn_comparar.grid(row=0, column=4, padx=10, pady=5)
         
-        # Comparar automáticamente al iniciar
         comparar()
         
-        tk.Button(ventana,
-            text="Cerrar",
-            font=("Arial", 10),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(ventana, text="Cerrar", font=("Arial", 10),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=20, pady=5).pack(pady=10)
     
     def historial_cambios(self):
-        """Muestra historial de cambios de precio usando historial_p"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Historial de Cambios")
         ventana.geometry("1000x600")
         ventana.configure(bg="#0a0f1e")
         ventana.transient(self.frame_principal)
         
-        tk.Label(ventana,
-            text="📅 HISTORIAL DE CAMBIOS DE PRECIO",
-            font=("Arial", 14, "bold"),
-            bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
+        tk.Label(ventana, text="📅 HISTORIAL DE CAMBIOS DE PRECIO",
+            font=("Arial", 14, "bold"), bg="#0a0f1e", fg="#e2e8f0").pack(pady=10)
         
-        # Frame de filtros
         frame_filtros = tk.Frame(ventana, bg="#1e293b")
         frame_filtros.pack(fill=tk.X, padx=20, pady=10)
         
-        tk.Label(frame_filtros,
-            text="Filtrar por producto (opcional):",
-            font=("Arial", 10),
-            bg="#1e293b", fg="#e2e8f0").pack(side=tk.LEFT, padx=10)
+        tk.Label(frame_filtros, text="Filtrar por producto (opcional):",
+            font=("Arial", 10), bg="#1e293b", fg="#e2e8f0").pack(side=tk.LEFT, padx=10)
         
-        # Cargar productos
         query_productos = """
         SELECT DISTINCT p.id_producto, p.nombre_producto, p.unidad_medida
         FROM producto p
@@ -1097,47 +809,42 @@ class GestionConsultas:
         """
         productos = execute_query(query_productos, fetch=True)
         
+        opciones = ["Todos los productos"]
         productos_dict = {"Todos los productos": None}
-        if productos:
-            for p in productos:
-                productos_dict[f"{p[1]} ({p[2]})"] = p[0]
         
-        combo_producto = ttk.Combobox(frame_filtros,
-            values=list(productos_dict.keys()),
-            state="readonly",
-            font=("Arial", 10),
-            width=40)
+        if productos:
+            df_productos = pd.DataFrame(productos, columns=['id', 'nombre', 'unidad'])
+            df_productos['display'] = df_productos['nombre'] + ' (' + df_productos['unidad'] + ')'
+            opciones.extend(df_productos['display'].tolist())
+            for _, row in df_productos.iterrows():
+                productos_dict[row['display']] = int(row['id'])
+        
+        combo_producto = ttk.Combobox(frame_filtros, values=opciones,
+            state="readonly", font=("Arial", 10), width=40)
         combo_producto.pack(side=tk.LEFT, padx=5)
         combo_producto.current(0)
         
-        # Frame para resultados
         frame_resultados = tk.Frame(ventana, bg="#1e293b")
         frame_resultados.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         scrollbar = ttk.Scrollbar(frame_resultados, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        tree = ttk.Treeview(frame_resultados,
-            columns=("Fecha", "Producto", "Cambio", "Fuente"),
-            show="headings",
+        columnas = ["Fecha", "Producto", "Cambio", "Fuente"]
+        anchos = np.array([150, 200, 450, 120])
+        
+        tree = ttk.Treeview(frame_resultados, columns=columnas, show="headings",
             yscrollcommand=scrollbar.set)
         scrollbar.config(command=tree.yview)
         
-        tree.heading("Fecha", text="Fecha y Hora")
-        tree.heading("Producto", text="Producto")
-        tree.heading("Cambio", text="Descripción del Cambio")
-        tree.heading("Fuente", text="Fuente")
-        
-        tree.column("Fecha", width=150, anchor="center")
-        tree.column("Producto", width=200)
-        tree.column("Cambio", width=450)
-        tree.column("Fuente", width=120, anchor="center")
+        anchors = ["center", "w", "w", "center"]
+        for col, ancho, anchor in zip(columnas, anchos, anchors):
+            tree.heading(col, text=col if col != "Cambio" else "Descripción del Cambio")
+            tree.column(col, width=int(ancho), anchor=anchor)
         
         tree.pack(fill=tk.BOTH, expand=True)
         
-        label_stats = tk.Label(ventana,
-            text="",
-            font=("Arial", 9),
+        label_stats = tk.Label(ventana, text="", font=("Arial", 9),
             bg="#0a0f1e", fg="#94a3b8")
         label_stats.pack(pady=5)
         
@@ -1148,14 +855,9 @@ class GestionConsultas:
             tree.delete(*tree.get_children())
             
             if id_producto is None:
-                # Mostrar todo el historial
                 query = """
-                SELECT 
-                    h.fecha_registro,
-                    p.nombre_producto,
-                    p.unidad_medida,
-                    h.observaciones,
-                    h.fuente
+                SELECT h.fecha_registro, p.nombre_producto, p.unidad_medida,
+                       h.observaciones, h.fuente
                 FROM historial_p h
                 INNER JOIN producto p ON h.id_producto = p.id_producto
                 ORDER BY h.fecha_registro DESC
@@ -1163,14 +865,9 @@ class GestionConsultas:
                 """
                 resultados = execute_query(query, fetch=True)
             else:
-                # Mostrar historial de un producto específico
                 query = """
-                SELECT 
-                    h.fecha_registro,
-                    p.nombre_producto,
-                    p.unidad_medida,
-                    h.observaciones,
-                    h.fuente
+                SELECT h.fecha_registro, p.nombre_producto, p.unidad_medida,
+                       h.observaciones, h.fuente
                 FROM historial_p h
                 INNER JOIN producto p ON h.id_producto = p.id_producto
                 WHERE h.id_producto = %s
@@ -1179,56 +876,49 @@ class GestionConsultas:
                 resultados = execute_query(query, (id_producto,), fetch=True)
             
             if resultados:
-                for fila in resultados:
-                    fecha = fila[0].strftime("%d/%m/%Y %H:%M:%S") if fila[0] else "N/A"
-                    producto = f"{fila[1]} ({fila[2]})"
-                    cambio = fila[3] if fila[3] else "Sin descripción"
-                    fuente = fila[4] if fila[4] else "N/A"
-                    
-                    tree.insert("", tk.END, values=(fecha, producto, cambio, fuente))
+                df = pd.DataFrame(resultados,
+                    columns=['fecha', 'producto', 'unidad', 'observacion', 'fuente'])
                 
-                stats = f"Se encontraron {len(resultados)} cambios registrados"
+                df['producto_display'] = df['producto'] + ' (' + df['unidad'] + ')'
+                df['fecha_display'] = df['fecha'].apply(
+                    lambda x: x.strftime("%d/%m/%Y %H:%M:%S") if pd.notna(x) else "N/A"
+                )
+                df['observacion_display'] = df['observacion'].fillna("Sin descripción")
+                df['fuente_display'] = df['fuente'].fillna("N/A")
+                
+                for _, row in df.iterrows():
+                    tree.insert("", tk.END, values=(
+                        row['fecha_display'], row['producto_display'],
+                        row['observacion_display'], row['fuente_display']
+                    ))
+                
+                stats = f"Se encontraron {len(df)} cambios registrados"
                 label_stats.config(text=stats, fg="#10b981")
             else:
-                label_stats.config(
-                    text="No hay cambios registrados",
-                    fg="#f59e0b"
-                )
+                label_stats.config(text="No hay cambios registrados", fg="#f59e0b")
         
-        btn_cargar = tk.Button(frame_filtros,
-            text="🔍 Buscar",
-            font=("Arial", 10, "bold"),
-            bg="#8b5cf6", fg="white",
-            command=cargar_historial,
-            padx=15, pady=5)
+        btn_cargar = tk.Button(frame_filtros, text="🔍 Buscar",
+            font=("Arial", 10, "bold"), bg="#8b5cf6", fg="white",
+            command=cargar_historial, padx=15, pady=5)
         btn_cargar.pack(side=tk.LEFT, padx=5)
         
-        # Cargar automáticamente al iniciar
         cargar_historial()
         
-        tk.Button(ventana,
-            text="Cerrar",
-            font=("Arial", 10),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(ventana, text="Cerrar", font=("Arial", 10),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=20, pady=5).pack(pady=10)
     
     def exportar_datos(self):
-        """Exporta datos a CSV/Excel"""
         ventana = tk.Toplevel(self.frame_principal)
         ventana.title("Exportar Datos")
         ventana.geometry("400x300")
         ventana.configure(bg="#0a0f1e")
         
-        tk.Label(ventana,
-            text="💾 EXPORTAR DATOS",
-            font=("Arial", 14, "bold"),
+        tk.Label(ventana, text="💾 EXPORTAR DATOS", font=("Arial", 14, "bold"),
             bg="#0a0f1e", fg="#e2e8f0").pack(pady=15)
         
-        tk.Label(ventana,
-            text="Seleccione qué datos desea exportar:",
-            font=("Arial", 10),
-            bg="#0a0f1e", fg="#94a3b8").pack(pady=5)
+        tk.Label(ventana, text="Seleccione qué datos desea exportar:",
+            font=("Arial", 10), bg="#0a0f1e", fg="#94a3b8").pack(pady=5)
         
         opciones = [
             ("Todas las ofertas actuales", "ofertas"),
@@ -1243,14 +933,9 @@ class GestionConsultas:
         frame_opciones.pack(pady=10)
         
         for texto, valor in opciones:
-            rb = tk.Radiobutton(frame_opciones,
-                text=texto,
-                variable=var_opcion,
-                value=valor,
-                font=("Arial", 10),
-                bg="#0a0f1e", fg="#e2e8f0",
-                selectcolor="#1e293b",
-                activebackground="#0a0f1e",
+            rb = tk.Radiobutton(frame_opciones, text=texto, variable=var_opcion,
+                value=valor, font=("Arial", 10), bg="#0a0f1e", fg="#e2e8f0",
+                selectcolor="#1e293b", activebackground="#0a0f1e",
                 activeforeground="#10b981")
             rb.pack(anchor="w", pady=3)
         
@@ -1266,64 +951,33 @@ class GestionConsultas:
             if not archivo:
                 return
             
-            if opcion == "ofertas":
-                query = """
-                SELECT 
-                    p.nombre_producto,
-                    p.unidad_medida,
-                    m.nombre_mercado,
-                    m.ciudad,
-                    o.precio,
-                    o.stock,
-                    o.fecha_actualizacion
-                FROM oferta o
-                INNER JOIN producto p ON o.id_producto = p.id_producto
-                INNER JOIN mercado m ON o.id_mercado = m.id_mercado
-                ORDER BY p.nombre_producto;
-                """
-                headers = ["Producto", "Unidad", "Mercado", "Ciudad", "Precio", "Stock", "Fecha"]
+            queries = {
+                'ofertas': ("""
+                    SELECT p.nombre_producto, p.unidad_medida, m.nombre_mercado, m.ciudad,
+                           o.precio, o.stock, o.fecha_actualizacion
+                    FROM oferta o
+                    INNER JOIN producto p ON o.id_producto = p.id_producto
+                    INNER JOIN mercado m ON o.id_mercado = m.id_mercado
+                    ORDER BY p.nombre_producto;
+                    """, ["Producto", "Unidad", "Mercado", "Ciudad", "Precio", "Stock", "Fecha"]),
+                'productos': ("""
+                    SELECT nombre_producto, categoria, unidad_medida, descripcion
+                    FROM producto WHERE activo = TRUE ORDER BY nombre_producto;
+                    """, ["Producto", "Categoría", "Unidad", "Descripción"]),
+                'mercados': ("""
+                    SELECT nombre_mercado, ciudad, departamento, direccion
+                    FROM mercado WHERE activo = TRUE ORDER BY nombre_mercado;
+                    """, ["Mercado", "Ciudad", "Departamento", "Dirección"]),
+                'historial': ("""
+                    SELECT p.nombre_producto, h.fecha_registro, h.stock, h.fuente, h.observaciones
+                    FROM historial_p h
+                    INNER JOIN producto p ON h.id_producto = p.id_producto
+                    ORDER BY h.fecha_registro DESC
+                    LIMIT 1000;
+                    """, ["Producto", "Fecha", "Stock", "Fuente", "Observaciones"])
+            }
             
-            elif opcion == "productos":
-                query = """
-                SELECT 
-                    nombre_producto,
-                    categoria,
-                    unidad_medida,
-                    descripcion
-                FROM producto
-                WHERE activo = TRUE
-                ORDER BY nombre_producto;
-                """
-                headers = ["Producto", "Categoría", "Unidad", "Descripción"]
-            
-            elif opcion == "mercados":
-                query = """
-                SELECT 
-                    nombre_mercado,
-                    ciudad,
-                    departamento,
-                    direccion
-                FROM mercado
-                WHERE activo = TRUE
-                ORDER BY nombre_mercado;
-                """
-                headers = ["Mercado", "Ciudad", "Departamento", "Dirección"]
-            
-            else:  # historial
-                query = """
-                SELECT 
-                    p.nombre_producto,
-                    h.fecha_registro,
-                    h.stock,
-                    h.fuente,
-                    h.observaciones
-                FROM historial_p h
-                INNER JOIN producto p ON h.id_producto = p.id_producto
-                ORDER BY h.fecha_registro DESC
-                LIMIT 1000;
-                """
-                headers = ["Producto", "Fecha", "Stock", "Fuente", "Observaciones"]
-            
+            query, headers = queries[opcion]
             datos = execute_query(query, fetch=True)
             
             if not datos:
@@ -1345,22 +999,15 @@ class GestionConsultas:
             except Exception as e:
                 messagebox.showerror("Error", f"Error al exportar:\n{str(e)}")
         
-        tk.Button(ventana,
-            text="💾 Exportar a CSV",
-            font=("Arial", 11, "bold"),
-            bg="#10b981", fg="white",
-            command=exportar_csv,
+        tk.Button(ventana, text="💾 Exportar a CSV", font=("Arial", 11, "bold"),
+            bg="#10b981", fg="white", command=exportar_csv,
             padx=30, pady=8).pack(pady=15)
         
-        tk.Button(ventana,
-            text="Cancelar",
-            font=("Arial", 10),
-            bg="#475569", fg="white",
-            command=ventana.destroy,
+        tk.Button(ventana, text="Cancelar", font=("Arial", 10),
+            bg="#475569", fg="white", command=ventana.destroy,
             padx=20, pady=5).pack()
     
     def exportar_tabla_csv(self, datos, nombre_base):
-        """Función auxiliar para exportar cualquier tabla a CSV"""
         if not datos:
             messagebox.showwarning("Sin datos", "No hay datos para exportar")
             return
@@ -1375,14 +1022,11 @@ class GestionConsultas:
             return
         
         try:
+            headers = ["Producto", "Unidad", "Categoría", "Mercado", "Ciudad", 
+                      "Precio", "Stock", "Fecha"] if nombre_base == "reporte_general" else [f"Columna_{i+1}" for i in range(len(datos[0]))]
+            
             with open(archivo, 'w', newline='', encoding='utf-8-sig') as f:
                 writer = csv.writer(f)
-                # Escribir headers (basados en el primer elemento)
-                if nombre_base == "reporte_general":
-                    headers = ["Producto", "Unidad", "Categoría", "Mercado", "Ciudad", "Precio", "Stock", "Fecha"]
-                else:
-                    headers = [f"Columna_{i+1}" for i in range(len(datos[0]))]
-                
                 writer.writerow(headers)
                 writer.writerows(datos)
             
@@ -1395,7 +1039,6 @@ class GestionConsultas:
             messagebox.showerror("Error", f"Error al exportar:\n{str(e)}")
     
     def volver(self):
-        """Vuelve al menú principal"""
         for widget in self.frame_principal.winfo_children():
             if widget != self.canvas:
                 widget.destroy()
