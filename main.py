@@ -104,16 +104,7 @@ class SistemaMercado:
                                font=("Arial", 28, "bold"), 
                                fill="#e2e8f0")
         
-        # Subtítulo con mejor espaciado
-        self.canvas.create_text(450, 265, 
-                               text="Herramienta integral para el análisis de datos históricos", 
-                               font=("Arial", 11), 
-                               fill="#94a3b8")
         
-        self.canvas.create_text(450, 285, 
-                               text="y proyección inteligente de precios de mercado en Bolivia", 
-                               font=("Arial", 11), 
-                               fill="#94a3b8")
         
         info_y = 350
         
@@ -187,15 +178,15 @@ class SistemaMercado:
         self.canvas.create_text(450, 490, 
                                text="INTEGRANTES", 
                                font=("Arial", 9, "bold"), 
-                               fill="#64748b")
+                               fill="white")
         
         nombres_linea1 = "Jhon Ever García Quispe  •  Uriel David Ribera Choque  •  Aldo Andrés Arandia Vásquez"
         nombres_linea2 = "José Raul Melgar Guagama  •  Yaimara Jissel Gil Inchu"
         
         self.canvas.create_text(450, 515, text=nombres_linea1, 
-                               font=("Arial", 8), fill="#94a3b8", anchor="center")
+                               font=("Arial", 8), fill="white", anchor="center")
         self.canvas.create_text(450, 535, text=nombres_linea2, 
-                               font=("Arial", 8), fill="#94a3b8", anchor="center")
+                               font=("Arial", 8), fill="white", anchor="center")
         
         self.animar_entrada()
     

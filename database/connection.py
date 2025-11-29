@@ -4,12 +4,9 @@ import sys
 
 class DatabaseConnection:
     
-    
     _connection_pool = None
-    
     @classmethod
     def initialize_pool(cls, minconn=1, maxconn=10):
-        """Inicializa el pool de conexiones"""
         try:
             cls._connection_pool = psycopg2.pool.SimpleConnectionPool(
                 minconn,
@@ -76,17 +73,6 @@ class DatabaseConnection:
 
 # Función auxiliar para ejecutar consultas
 def execute_query(query, params=None, fetch=False):
-    """
-    Ejecuta una consulta SQL
-    
-    Args:
-        query (str): Consulta SQL
-        params (tuple): Parámetros de la consulta
-        fetch (bool): Si True, retorna los resultados
-    
-    Returns:
-        list/bool: Resultados si fetch=True, sino True/False según éxito
-    """
     conn = DatabaseConnection.get_connection()
     if not conn:
         return False if not fetch else []
