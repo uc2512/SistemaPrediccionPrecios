@@ -469,15 +469,7 @@ class SistemaMercado:
         # Botón Salir centrado
         self.crear_boton_footer(450, 490, "🚪 Salir", "#dc2626", self.salir_sistema)
         
-        # Footer
-        self.canvas.create_text(450, 545, 
-                               text="Sistema Integrado de Análisis de Mercados", 
-                               font=("Arial", 9), 
-                               fill="#64748b")
-        self.canvas.create_text(450, 565, 
-                               text="v1.0 Beta - © 2025 Ingeniería de Sistemas UAB", 
-                               font=("Arial", 8), 
-                               fill="#475569")
+       
     
     def crear_tarjeta_modulo(self, x, y, icono, titulo, descripcion, color, comando):
         

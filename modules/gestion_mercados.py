@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from database.connection import execute_query
 
+
 class GestionMercados:
     def __init__(self, canvas, frame_principal, volver_menu):
         self.canvas = canvas
@@ -16,6 +17,7 @@ class GestionMercados:
         self.canvas.delete("all")
         self.crear_interfaz()
         self.cargar_mercados()
+        
     
     def crear_interfaz(self):
         """Crea la interfaz de gestión de mercados"""

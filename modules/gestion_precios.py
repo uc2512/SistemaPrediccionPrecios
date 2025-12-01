@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 
+
 class GestionPrecios:
     def __init__(self, canvas, frame_principal, volver_menu):
         self.canvas = canvas
@@ -19,6 +20,7 @@ class GestionPrecios:
         self.cargar_datos_base()
         self.crear_interfaz()
         self.cargar_ofertas()
+        
     
     def cargar_datos_base(self):
         query_productos = """

@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from database.connection import DatabaseConnection, execute_query
 
+
 class GestionProductos:
     def __init__(self, parent_canvas, parent_frame, volver_callback):
         self.canvas = parent_canvas
@@ -21,6 +22,7 @@ class GestionProductos:
         # Crear interfaz
         self.crear_interfaz()
         self.cargar_productos()
+        
     
     def crear_interfaz(self):
         """Crea la interfaz completa del módulo"""
