@@ -61,28 +61,26 @@ class SistemaMercado:
             return None
     
     def crear_interfaz_inicial(self):
-        # Frame principal
+       
         self.frame_principal = tk.Frame(self.root, bg="#0a0f1e")
         self.frame_principal.pack(fill=tk.BOTH, expand=True)
         
-        # Canvas para efectos visuales
+        
         self.canvas = tk.Canvas(self.frame_principal, width=900, height=600, 
                                bg="#0a0f1e", highlightthickness=0)
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
-        # Cargar logos
+       
         self.logo_izquierdo = self.cargar_logo("logo_izquierdo.png", 100, 100)
         self.logo_derecho = self.cargar_logo("logo_derecho.png", 100, 100)
         
-        # Insertar logo izquierdo más discreto
+       
         if self.logo_izquierdo:
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
         
-        # Insertar logo derecho más discreto
         if self.logo_derecho:
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
         
-        # Header simplificado
         self.canvas.create_text(450, 100, 
                                text="UNIVERSIDAD AUTÓNOMA DEL BENI", 
                                font=("Arial", 13), 
@@ -93,7 +91,6 @@ class SistemaMercado:
                                font=("Arial", 11), 
                                fill="#94a3b8")
         
-        # Título principal más espaciado y moderno
         self.canvas.create_text(450, 185, 
                                text="Sistema de Análisis y", 
                                font=("Arial", 28), 
@@ -103,8 +100,6 @@ class SistemaMercado:
                                text="Predicción de Precios del Mercado", 
                                font=("Arial", 28, "bold"), 
                                fill="#e2e8f0")
-        
-        
         
         info_y = 350
         

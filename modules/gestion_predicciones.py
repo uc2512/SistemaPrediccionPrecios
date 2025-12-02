@@ -444,7 +444,22 @@ Período analizado: {n} días de datos históricos
    Error estándar: ±{std_error:.2f} Bs
    Nivel de confianza: {"Alto" if std_error < 2 else "Medio" if std_error < 5 else "Bajo"}
             """
-            
+            if std_error < 2:
+                nivel_confianza = 85.0
+            elif std_error < 5:
+                nivel_confianza = 65.0
+            else:
+                nivel_confianza = 40.0
+    
+    
+            self.guardar_prediccion(
+                id_producto=id_producto,
+                precio_estimado=precio_predicho,
+                nivel_confianza=nivel_confianza,
+                tendencia=tendencia.split()[0],  # "ALCISTA", "BAJISTA", o "ESTABLE"
+                fecha_objetivo=fecha_futura,
+                modelo_usado="Regresión Lineal"
+            )
             label_resultado.delete("1.0", tk.END)
             label_resultado.insert("1.0", resultado_texto)
             label_resultado.config(fg="#e2e8f0")
@@ -703,7 +718,30 @@ Total de datos históricos: {len(df_datos)}
    el promedio de los últimos {ventana_dias} días. Este modelo
    funciona mejor en mercados estables sin tendencias fuertes.
             """
+            if confianza == "Alta":
+                nivel_conf_num = 80.0
+            elif confianza == "Media":
+                nivel_conf_num = 60.0
+            else:
+                nivel_conf_num = 35.0
+    
             
+            if media_movil > precio_actual * 1.02:
+                tend = "ALCISTA"
+            elif media_movil < precio_actual * 0.98:
+                tend = "BAJISTA"
+            else:
+                tend = "ESTABLE"
+    
+    
+            self.guardar_prediccion(
+                id_producto=id_producto,
+                precio_estimado=media_movil,
+                nivel_confianza=nivel_conf_num,
+                tendencia=tend,
+                fecha_objetivo=fecha_futura,
+                modelo_usado=f"Media Móvil (ventana={ventana_dias}d)"
+            )
             text_resultado.delete("1.0", tk.END)
             text_resultado.insert("1.0", resultado_texto)
             text_resultado.config(fg="#e2e8f0")
@@ -1037,7 +1075,25 @@ Datos históricos: {len(df_datos)} registros
    {"cada " + nombre_ciclo.lower() + ". Usa este patrón para planificar" if fuerza_patron > 15 else "otros factores que por el ciclo " + nombre_ciclo.lower() + "." if fuerza_patron > 5 else "parecen variar por razones no cíclicas."}
    {"compras en días baratos y ventas en días caros." if fuerza_patron > 15 else "Considera otros modelos de predicción." if fuerza_patron > 5 else ""}
             """
+            if confianza == "Alta":
+                nivel_conf_num = 75.0
+            elif confianza == "Media":
+                nivel_conf_num = 55.0
+            else:
+                nivel_conf_num = 30.0
+    
             
+            tend = tendencia.split()[0]  
+    
+            
+            self.guardar_prediccion(
+                id_producto=id_producto,
+                precio_estimado=precio_predicho,
+                nivel_confianza=nivel_conf_num,
+                tendencia=tend,
+                fecha_objetivo=fecha_futura,
+                modelo_usado=f"Análisis Estacional ({nombre_ciclo})"
+            )
             text_resultado.delete("1.0", tk.END)
             text_resultado.insert("1.0", resultado_texto)
             text_resultado.config(fg="#e2e8f0")
@@ -1346,7 +1402,25 @@ Datos históricos: {len(df_datos)} registros
    {"  a los últimos cambios de precio." if alpha > 0.6 else "  entre datos recientes e históricos." if alpha > 0.3 else "  que ignora fluctuaciones pequeñas."}
    {"• Ideal para mercados volátiles" if alpha > 0.6 else "• Útil para la mayoría de casos" if alpha > 0.3 else "• Mejor para mercados estables"}
             """
+            if confianza == "Alta":
+                nivel_conf_num = 82.0
+            elif confianza == "Media":
+                nivel_conf_num = 62.0
+            else:
+                nivel_conf_num = 38.0
+    
+    
+            tend = tendencia.split()[0]  
+    
             
+            self.guardar_prediccion(
+                id_producto=id_producto,
+                precio_estimado=precio_predicho,
+                nivel_confianza=nivel_conf_num,
+                tendencia=tend,
+                fecha_objetivo=fecha_futura,
+                modelo_usado=f"Suavizado Exponencial (α={alpha:.1f})"
+            )
             text_resultado.delete("1.0", tk.END)
             text_resultado.insert("1.0", resultado_texto)
             text_resultado.config(fg="#e2e8f0")
@@ -1482,6 +1556,23 @@ Datos históricos: {len(df_datos)} registros
             "Visualización completa del historial\n"
             "comparado con las predicciones futuras.\n\n"
             "Próximamente disponible...")
+    def guardar_prediccion(self, id_producto, precio_estimado, nivel_confianza, 
+                      tendencia, fecha_objetivo, modelo_usado):
+        
+        query = """
+        INSERT INTO prediccion (precio_estimado, nivel_confianza, tendencia, 
+                           fecha_objetivo, modelo_usado)
+        VALUES (%s, %s, %s, %s, %s)
+        RETURNING id_prediccion;
+        """
+    
+        resultado = execute_query(query, (precio_estimado, nivel_confianza, 
+                                         tendencia, fecha_objetivo, modelo_usado), 
+                                 fetch=True)
+    
+        if resultado:
+            id_pred = resultado[0][0]
+            print(f"✓ Predicción guardada con ID: {id_pred}")
     
     def get_id_from_combo(self, combo, df):
         if df is None:

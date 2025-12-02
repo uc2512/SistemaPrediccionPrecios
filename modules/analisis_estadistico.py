@@ -273,7 +273,24 @@ class AnalisisEstadistico:
         }
         
         self.btn_grafico_evolucion.config(state=tk.NORMAL)
-        
+        alertas = self.generar_alertas_automaticas(
+            id_producto, 
+            self.combo_producto.get(),
+            precio_actual,
+            precio_promedio,
+            volatilidad_porcentaje
+        )
+    
+        # Mostrar alertas generadas
+        if alertas:
+            alertas_texto = "\n\n".join([msg for _, msg in alertas])
+            messagebox.showinfo("⚠️ Alertas Generadas", 
+                f"✓ Análisis completado\n\n"
+                f"Se generaron {len(alertas)} alerta(s):\n\n{alertas_texto}")
+        else:
+            messagebox.showinfo("Análisis Completo", 
+                f"✓ Análisis estadístico completado\n\n"
+                f"No se detectaron condiciones especiales.")
         messagebox.showinfo("Análisis Completo", 
             f"✓ Análisis estadístico completado\n\n"
             f"Producto: {self.combo_producto.get()}\n"
@@ -417,6 +434,51 @@ class AnalisisEstadistico:
         valor_seleccionado = self.combo_producto.get()
         match = self.df_productos[self.df_productos['display'] == valor_seleccionado]
         return int(match.iloc[0]['id']) if len(match) > 0 else None
+    def generar_alertas_automaticas(self, id_producto, nombre_producto, precio_actual, 
+                                precio_promedio, volatilidad_porcentaje):
+        """Genera alertas automáticas basadas en el análisis"""
+    
+        alertas_generadas = []
+    
+        # ALERTA 1: Precio muy por debajo del promedio (oportunidad de compra)
+        if precio_actual < precio_promedio * 0.85:  # 15% o más bajo
+            diferencia = ((precio_promedio - precio_actual) / precio_promedio) * 100
+            mensaje = (f"🟢 OPORTUNIDAD DE COMPRA: {nombre_producto} está {diferencia:.1f}% "
+                    f"por debajo del precio promedio ({precio_actual:.2f} Bs vs {precio_promedio:.2f} Bs)")
+            self.insertar_alerta(1, mensaje, "precio_bajo", id_producto)
+            alertas_generadas.append(("precio_bajo", mensaje))
+    
+        # ALERTA 2: Precio muy por encima del promedio (advertencia)
+        elif precio_actual > precio_promedio * 1.15:  # 15% o más alto
+            diferencia = ((precio_actual - precio_promedio) / precio_promedio) * 100
+            mensaje = (f"🔴 PRECIO ELEVADO: {nombre_producto} está {diferencia:.1f}% "
+                    f"por encima del precio promedio ({precio_actual:.2f} Bs vs {precio_promedio:.2f} Bs)")
+            self.insertar_alerta(1, mensaje, "precio_alto", id_producto)
+            alertas_generadas.append(("precio_alto", mensaje))
+    
+        # ALERTA 3: Alta volatilidad
+        if volatilidad_porcentaje > 20:
+            mensaje = (f"⚠️ ALTA VOLATILIDAD: {nombre_producto} presenta variaciones de "
+                    f"{volatilidad_porcentaje:.1f}%, lo que indica precios inestables")
+            self.insertar_alerta(1, mensaje, "volatilidad_alta", id_producto)
+            alertas_generadas.append(("volatilidad", mensaje))
+    
+        # ALERTA 4: Precio estable (información positiva)
+        elif volatilidad_porcentaje < 5:
+            mensaje = (f"✅ PRECIO ESTABLE: {nombre_producto} tiene baja volatilidad "
+                    f"({volatilidad_porcentaje:.1f}%), ideal para planificación")
+            self.insertar_alerta(1, mensaje, "precio_estable", id_producto)
+            alertas_generadas.append(("estable", mensaje))
+    
+        return alertas_generadas
+
+    def insertar_alerta(self, id_usuario, mensaje, tipo_alerta, id_producto=None):
+        """Inserta una alerta en la base de datos"""
+        query = """
+        INSERT INTO alerta (id_usuario, mensaje, tipo_alerta, leida)
+        VALUES (%s, %s, %s, FALSE);
+        """
+        execute_query(query, (id_usuario, mensaje, tipo_alerta))
     
     def crear_boton_volver(self):
         self.btn_volver = tk.Button(self.frame_principal, text="← Volver al Menú",
