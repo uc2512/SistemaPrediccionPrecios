@@ -14,16 +14,14 @@ class GestionMercados:
         # Variables
         self.df_mercados = None
         self.mercado_seleccionado = None
-        self.item_seleccionado = None  # ← NUEVO: Guardar item del tree
+        self.item_seleccionado = None  
         
         self.canvas.delete("all")
         self.crear_interfaz()
         self.cargar_mercados()
     
     def crear_interfaz(self):
-        """Crea la interfaz de gestión de mercados"""
         
-        # Header
         self.canvas.create_text(450, 30, 
                                text="🏪 GESTIÓN DE MERCADOS", 
                                font=("Arial", 20, "bold"), 
@@ -34,10 +32,8 @@ class GestionMercados:
                                font=("Arial", 11), 
                                fill="#94a3b8")
         
-        # Línea divisoria
         self.canvas.create_line(80, 75, 820, 75, fill="#334155", width=2)
-        
-        # === SECCIÓN FORMULARIO ===
+    
         self.canvas.create_rectangle(50, 90, 850, 280, 
                                      fill="#1e293b", outline="#3b82f6", width=2)
         
@@ -46,20 +42,17 @@ class GestionMercados:
                                font=("Arial", 12, "bold"), 
                                fill="#3b82f6")
         
-        # Configuración de campos usando numpy para posiciones
         y_base = 135
         spacing = 40
         
-        # Diccionario de configuración de campos
         campos_config = {
             'nombre': ('Nombre:', 120, y_base, 30),
             'ciudad': ('Ciudad:', 120, y_base + spacing, 30),
-            'departamento': ('Departamento:', 120, y_base + spacing*2, 30),
+            'departamento': ('Dpto:', 120, y_base + spacing*2, 30),
             'barrio': ('Barrio:', 480, y_base, 30),
             'avenida': ('Avenida:', 480, y_base + spacing, 30)
         }
         
-        # Crear campos dinámicamente
         self.entries = {}
         for key, (label, x, y, width) in campos_config.items():
             self.canvas.create_text(x, y, 
@@ -75,7 +68,6 @@ class GestionMercados:
             entry.place(x=x + 80 if x == 120 else x + 80, y=y-10)
             self.entries[key] = entry
         
-        # Dirección completa (campo especial más largo)
         self.canvas.create_text(120, y_base + spacing*3, 
                                text="Dirección:", 
                                font=("Arial", 10, "bold"), 
@@ -89,7 +81,6 @@ class GestionMercados:
         )
         self.entries['direccion'].place(x=200, y=y_base + spacing*3 - 10)
         
-        # Botones de acción del formulario
         btn_config = [
             ('agregar', "✚ Agregar", "#10b981", "#059669", 50, self.agregar_mercado),
             ('editar', "✎ Editar", "#f59e0b", "#d97706", 170, self.editar_mercado),
@@ -111,7 +102,6 @@ class GestionMercados:
             btn.place(x=x, y=btn_y)
             self.buttons[attr] = btn
         
-        # === SECCIÓN TABLA ===
         self.canvas.create_rectangle(50, 295, 850, 530, 
                                      fill="#1e293b", outline="#3b82f6", width=2)
         
@@ -120,29 +110,24 @@ class GestionMercados:
                                font=("Arial", 12, "bold"), 
                                fill="#3b82f6")
         
-        # Frame para Treeview
         self.frame_tabla = tk.Frame(self.frame_principal, bg="#0f172a")
         self.frame_tabla.place(x=70, y=330, width=760, height=180)
         
-        # Scrollbar
         scrollbar = ttk.Scrollbar(self.frame_tabla, orient=tk.VERTICAL)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Configuración de columnas con numpy
         columnas = ["ID", "Nombre", "Ciudad", "Departamento", "Barrio", "Avenida", "Estado"]
         anchos = np.array([40, 180, 100, 100, 100, 100, 80])
         
-        # Treeview con selectmode='browse' para asegurar selección
         self.tree = ttk.Treeview(self.frame_tabla,
                                 columns=columnas,
                                 show="headings",
                                 yscrollcommand=scrollbar.set,
-                                selectmode='browse',  # ← CRÍTICO: Modo de selección
+                                selectmode='browse',  
                                 height=8)
         
         scrollbar.config(command=self.tree.yview)
         
-        # Configurar columnas con numpy
         for i, col in enumerate(columnas):
             self.tree.heading(col, text=col)
             anchor = "center" if i in [0, 6] else "w"
@@ -150,18 +135,15 @@ class GestionMercados:
         
         self.tree.pack(fill=tk.BOTH, expand=True)
         
-        # ← CRÍTICO: Múltiples eventos para asegurar captura
         self.tree.bind("<<TreeviewSelect>>", self.seleccionar_mercado)
-        self.tree.bind("<ButtonRelease-1>", self.on_click)  # Click del mouse
-        self.tree.bind("<space>", self.seleccionar_mercado)  # Tecla espacio
-        self.tree.bind("<Return>", self.seleccionar_mercado)  # Tecla Enter
+        self.tree.bind("<ButtonRelease-1>", self.on_click)  
+        self.tree.bind("<space>", self.seleccionar_mercado)  
+        self.tree.bind("<Return>", self.seleccionar_mercado)  
         
-        # Configurar tag para selección visual MUY VISIBLE
         self.tree.tag_configure('selected', 
                                background='#3b82f6', 
                                foreground='white')
         
-        # Estilo del Treeview - MÁS VISIBLE
         style = ttk.Style()
         style.theme_use("clam")
         
@@ -170,9 +152,8 @@ class GestionMercados:
                        foreground="white",
                        fieldbackground="#0f172a",
                        borderwidth=0,
-                       rowheight=28)  # ← Filas más altas
+                       rowheight=28)  
         
-        # Colores de selección MUY VISIBLES
         style.map("Treeview",
                  background=[('selected', '#3b82f6'), ('active', '#2563eb')],
                  foreground=[('selected', 'white'), ('active', 'white')])
@@ -183,7 +164,6 @@ class GestionMercados:
                        borderwidth=1,
                        relief="flat")
         
-        # Botón Volver
         self.btn_volver = tk.Button(self.frame_principal,
                                     text="← Volver al Menú",
                                     font=("Arial", 11, "bold"),
@@ -195,20 +175,14 @@ class GestionMercados:
         self.btn_volver.place(x=380, y=550)
     
     def on_click(self, event):
-        """Maneja clicks del mouse directamente"""
-        # Identificar qué fila fue clickeada
         item = self.tree.identify_row(event.y)
         if item:
-            # Forzar selección
             self.tree.selection_set(item)
             self.tree.focus(item)
-            # Llamar manualmente al manejador
             self.seleccionar_mercado(event)
             print(f"🖱️ Click detectado en item: {item}")
     
     def cargar_mercados(self):
-        """Carga mercados usando pandas"""
-        # Limpiar selección anterior
         for item in self.tree.get_children():
             self.tree.delete(item)
         
@@ -222,14 +196,11 @@ class GestionMercados:
         resultados = execute_query(query, fetch=True)
         
         if resultados:
-            # Usar pandas DataFrame
             columnas = ['id', 'nombre', 'ciudad', 'depto', 'barrio', 'avenida', 'activo']
             self.df_mercados = pd.DataFrame(resultados, columns=columnas)
             
-            # Mapear valores booleanos a texto
             self.df_mercados['estado_texto'] = self.df_mercados['activo'].map({True: 'Activo', False: 'Inactivo'})
-            
-            # Insertar en tabla
+        
             for row in self.df_mercados.itertuples(index=False):
                 item_id = self.tree.insert("", tk.END, values=(
                     row.id, row.nombre, row.ciudad, row.depto,
@@ -238,11 +209,9 @@ class GestionMercados:
                 print(f"📊 Insertado: {row.nombre} con ID {row.id}")
     
     def obtener_datos_formulario(self):
-        """Obtiene datos del formulario como diccionario"""
         return {key: entry.get().strip() for key, entry in self.entries.items()}
     
     def agregar_mercado(self):
-        """Agrega un nuevo mercado"""
         datos = self.obtener_datos_formulario()
         
         if not datos['nombre']:
@@ -266,7 +235,6 @@ class GestionMercados:
             messagebox.showerror("Error", "No se pudo agregar el mercado")
     
     def seleccionar_mercado(self, event):
-        """Llena el formulario con el mercado seleccionado"""
         print("🔍 seleccionar_mercado() llamado")
         
         seleccion = self.tree.selection()
@@ -276,41 +244,33 @@ class GestionMercados:
             print("   ⚠️ No hay selección")
             return
         
-        # Quitar tags de TODAS las filas
         for item in self.tree.get_children():
             self.tree.item(item, tags=())
         
-        # Obtener datos del item seleccionado
         self.item_seleccionado = seleccion[0]
         item_data = self.tree.item(self.item_seleccionado)
         valores = item_data['values']
         
         print(f"   ✅ Valores obtenidos: {valores}")
-        
-        # Guardar ID del mercado
+    
         self.mercado_seleccionado = valores[0]
         print(f"   💾 ID guardado: {self.mercado_seleccionado}")
         
-        # Aplicar tag visual AZUL BRILLANTE
         self.tree.item(self.item_seleccionado, tags=('selected',))
         
-        # Cambiar color de fondo también con itemconfig
         try:
             self.tree.tag_configure('selected', background='#3b82f6', foreground='white')
             print("   🎨 Tag 'selected' aplicado")
         except Exception as e:
             print(f"   ❌ Error aplicando tag: {e}")
         
-        # Buscar en DataFrame y llenar formulario
         if self.df_mercados is not None:
             try:
                 mercado = self.df_mercados[self.df_mercados['id'] == valores[0]].iloc[0]
                 
-                # Limpiar formulario primero
                 for entry in self.entries.values():
                     entry.delete(0, tk.END)
                 
-                # Mapear campos
                 campos_map = {
                     'nombre': 'nombre',
                     'ciudad': 'ciudad',
@@ -319,29 +279,26 @@ class GestionMercados:
                     'avenida': 'avenida'
                 }
                 
-                # Llenar formulario
                 for key, col in campos_map.items():
                     valor = mercado[col]
                     if pd.notna(valor):
                         self.entries[key].insert(0, str(valor))
                         print(f"   📝 {key}: {valor}")
                 
-                # Cargar dirección completa
                 query = "SELECT direccion FROM mercado WHERE id_mercado = %s;"
                 resultado = execute_query(query, (valores[0],), fetch=True)
                 if resultado and resultado[0][0]:
                     self.entries['direccion'].insert(0, resultado[0][0])
                     print(f"   📝 direccion: {resultado[0][0]}")
                 
-                print("   ✅ Formulario llenado correctamente")
+                print("    Formulario llenado correctamente")
                 
             except Exception as e:
-                print(f"   ❌ Error llenando formulario: {e}")
+                print(f"    Error llenando formulario: {e}")
                 import traceback
                 traceback.print_exc()
     
     def editar_mercado(self):
-        """Edita el mercado seleccionado"""
         print(f"🔧 editar_mercado() - ID seleccionado: {self.mercado_seleccionado}")
         
         if self.mercado_seleccionado is None:
@@ -374,7 +331,6 @@ class GestionMercados:
             messagebox.showerror("Error", "No se pudo actualizar el mercado")
     
     def eliminar_mercado(self):
-        """Elimina (desactiva) el mercado seleccionado"""
         print(f"🗑️ eliminar_mercado() - ID seleccionado: {self.mercado_seleccionado}")
         
         if self.mercado_seleccionado is None:
@@ -382,7 +338,6 @@ class GestionMercados:
                 "Seleccione un mercado de la tabla haciendo clic sobre él")
             return
         
-        # Obtener nombre del mercado
         nombre = "este mercado"
         if self.df_mercados is not None:
             mercado = self.df_mercados[self.df_mercados['id'] == self.mercado_seleccionado]
@@ -406,27 +361,23 @@ class GestionMercados:
                 messagebox.showerror("Error", "No se pudo desactivar el mercado")
     
     def limpiar_formulario(self):
-        """Limpia todos los campos del formulario"""
-        print("🧹 Limpiando formulario...")
+        print(" Limpiando formulario...")
         
         for entry in self.entries.values():
             entry.delete(0, tk.END)
         
-        # Limpiar variables de selección
         self.mercado_seleccionado = None
         self.item_seleccionado = None
         
-        # Quitar tags visuales de todas las filas
         for item in self.tree.get_children():
             self.tree.item(item, tags=())
         
         # Deseleccionar en el tree
         self.tree.selection_remove(*self.tree.selection())
         
-        print("   ✅ Formulario limpiado")
+        print("   Formulario limpiado")
     
     def volver(self):
-        """Vuelve al menú principal"""
         self.limpiar_formulario()
         for widget in self.frame_principal.winfo_children():
             if widget != self.canvas:
