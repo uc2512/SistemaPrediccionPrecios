@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from database.connection import execute_query
+from database.connection import execute_query, DatabaseConnection
 from datetime import datetime, timedelta
 import math
 import pandas as pd
@@ -451,8 +452,12 @@ Período analizado: {n} días de datos históricos
             else:
                 nivel_confianza = 40.0
     
-    
-            self.guardar_prediccion(
+            print(f"🔍 Intentando guardar predicción...")
+            print(f"   - Producto ID: {id_producto}")
+            print(f"   - Precio: {precio_predicho:.2f}")
+            print(f"   - Confianza: {nivel_confianza:.1f}%")
+            print(f"   - Fecha: {fecha_futura}")
+            id_pred = self.guardar_prediccion(
                 id_producto=id_producto,
                 precio_estimado=precio_predicho,
                 nivel_confianza=nivel_confianza,
@@ -460,6 +465,8 @@ Período analizado: {n} días de datos históricos
                 fecha_objetivo=fecha_futura,
                 modelo_usado="Regresión Lineal"
             )
+            if id_pred:
+                print(f"✅ Predicción guardada exitosamente con ID: {id_pred}")
             label_resultado.delete("1.0", tk.END)
             label_resultado.insert("1.0", resultado_texto)
             label_resultado.config(fg="#e2e8f0")
@@ -1558,21 +1565,61 @@ Datos históricos: {len(df_datos)} registros
             "Próximamente disponible...")
     def guardar_prediccion(self, id_producto, precio_estimado, nivel_confianza, 
                       tendencia, fecha_objetivo, modelo_usado):
+    
+        precio_estimado = float(precio_estimado)  
+        nivel_confianza = float(nivel_confianza)  
+        tendencia = str(tendencia)  
+        modelo_usado = str(modelo_usado)
+    
+            
+        conn = DatabaseConnection.get_connection()
+        if not conn:
+            print("❌ Error: No se pudo obtener conexión a la BD")
+            return None
+    
+        try:
+            cursor = conn.cursor()
         
-        query = """
-        INSERT INTO prediccion (precio_estimado, nivel_confianza, tendencia, 
-                           fecha_objetivo, modelo_usado)
-        VALUES (%s, %s, %s, %s, %s)
-        RETURNING id_prediccion;
-        """
-    
-        resultado = execute_query(query, (precio_estimado, nivel_confianza, 
-                                         tendencia, fecha_objetivo, modelo_usado), 
-                                 fetch=True)
-    
-        if resultado:
-            id_pred = resultado[0][0]
-            print(f"✓ Predicción guardada con ID: {id_pred}")
+            query = """
+            INSERT INTO prediccion (precio_estimado, nivel_confianza, tendencia, 
+                                   fecha_objetivo, modelo_usado)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id_prediccion;
+            """
+        
+            cursor.execute(query, (precio_estimado, nivel_confianza, 
+                                  tendencia, fecha_objetivo, modelo_usado))
+        
+        
+            resultado = cursor.fetchone()
+        
+            
+            conn.commit()
+        
+            cursor.close()
+            DatabaseConnection.return_connection(conn)
+        
+            if resultado:
+                id_pred = resultado[0]
+                print(f"✓ Predicción guardada exitosamente con ID: {id_pred}")
+                print(f"  • Precio estimado: {precio_estimado:.2f} Bs")
+                print(f"  • Nivel de confianza: {nivel_confianza:.1f}%")
+                print(f"  • Tendencia: {tendencia}")
+                print(f"  • Fecha objetivo: {fecha_objetivo}")
+                print(f"  • Modelo: {modelo_usado}")
+                return id_pred
+            else:
+                print("⚠️ Advertencia: INSERT no retornó ID")
+                return None
+            
+        except Exception as e:
+            print(f"❌ Error al guardar predicción: {e}")
+            import traceback
+            traceback.print_exc()  # Imprime el error completo para debugging
+            if conn:
+                conn.rollback()  # Revertir cambios en caso de error
+                DatabaseConnection.return_connection(conn)
+            return None
     
     def get_id_from_combo(self, combo, df):
         if df is None:

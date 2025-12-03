@@ -439,16 +439,15 @@ class SistemaMercado:
                                font=("Arial", 12), 
                                fill="#94a3b8")
         
-        # Línea divisoria elegante
+        
         self.canvas.create_line(80, 90, 820, 90, fill="#334155", width=2)
         
-        # Título del menú
+        
         self.canvas.create_text(450, 125, 
                                text="MENÚ PRINCIPAL", 
                                font=("Arial", 22, "bold"), 
                                fill="#3b82f6")
         
-        # Crear tarjetas mejoradas (2x2) - más arriba
         self.crear_tarjeta_modulo(270, 220, "📊", "Gestión de Datos", 
                                  "Productos, Precios y Mercados", "#10b981", self.modulo_gestion)
         
@@ -461,7 +460,7 @@ class SistemaMercado:
         self.crear_tarjeta_modulo(630, 360, "🔍", "Consultas y Reportes", 
                                  "Búsqueda y Exportación", "#06b6d4", self.modulo_consultas)
         
-        # Botón Salir centrado
+       
         self.crear_boton_footer(450, 490, "🚪 Salir", "#dc2626", self.salir_sistema)
         
        

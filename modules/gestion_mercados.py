@@ -13,6 +13,7 @@ class GestionMercados:
         
         # Variables
         self.df_mercados = None  # DataFrame para almacenar mercados
+        self.mercado_seleccionado = None  # ← AGREGADO: Variable para guardar ID
         
         self.canvas.delete("all")
         self.crear_interfaz()
@@ -136,6 +137,7 @@ class GestionMercados:
                                 columns=columnas,
                                 show="headings",
                                 yscrollcommand=scrollbar.set,
+                                style="Mercados.Treeview",  # ← Estilo específico
                                 height=8)
         
         scrollbar.config(command=self.tree.yview)
@@ -151,20 +153,28 @@ class GestionMercados:
         # Evento de selección
         self.tree.bind("<<TreeviewSelect>>", self.seleccionar_mercado)
         
+        # Configurar tag para fila seleccionada con color más visible
+        self.tree.tag_configure('selected', background='#3b82f6', foreground='white')
+        
         # Estilo del Treeview
         style = ttk.Style()
         style.theme_use("clam")
-        style.configure("Treeview",
+        
+        # Estilo específico para esta tabla
+        style.configure("Mercados.Treeview",
                        background="#0f172a",
                        foreground="white",
                        fieldbackground="#0f172a",
-                       borderwidth=0)
-        style.map("Treeview",
-                 background=[("selected", "#3b82f6")])
-        style.configure("Treeview.Heading",
+                       borderwidth=0,
+                       rowheight=25)
+        style.map("Mercados.Treeview",
+                 background=[("selected", "#3b82f6")],
+                 foreground=[("selected", "white")])
+        style.configure("Mercados.Treeview.Heading",
                        background="#1e293b",
                        foreground="white",
-                       borderwidth=1)
+                       borderwidth=1,
+                       relief="flat")
         
         # Botón Volver
         self.btn_volver = tk.Button(self.frame_principal,
@@ -237,8 +247,19 @@ class GestionMercados:
         """Llena el formulario con el mercado seleccionado usando pandas"""
         seleccion = self.tree.selection()
         if seleccion:
+            # Quitar tags de filas anteriores
+            for item in self.tree.get_children():
+                self.tree.item(item, tags=())
+            
             item = self.tree.item(seleccion[0])
             valores = item['values']
+            
+            # ← CORREGIDO: Guardar ID del mercado seleccionado
+            self.mercado_seleccionado = valores[0]
+            print(f"✓ Mercado seleccionado: ID {self.mercado_seleccionado}")
+            
+            # Aplicar tag de selección visual
+            self.tree.item(seleccion[0], tags=('selected',))
             
             # Buscar en DataFrame si existe
             if self.df_mercados is not None:
@@ -268,13 +289,11 @@ class GestionMercados:
     
     def editar_mercado(self):
         """Edita el mercado seleccionado"""
-        seleccion = self.tree.selection()
-        if not seleccion:
-            messagebox.showwarning("Advertencia", "Seleccione un mercado para editar")
+        # ← CORREGIDO: Validar que haya un mercado seleccionado
+        if self.mercado_seleccionado is None:
+            messagebox.showwarning("Advertencia", 
+                "Seleccione un mercado de la tabla haciendo clic sobre él")
             return
-        
-        item = self.tree.item(seleccion[0])
-        id_mercado = item['values'][0]
         
         datos = self.obtener_datos_formulario()
         
@@ -290,7 +309,8 @@ class GestionMercados:
         """
         
         params = (datos['nombre'], datos['ciudad'], datos['departamento'],
-                 datos['barrio'], datos['avenida'], datos['direccion'], id_mercado)
+                 datos['barrio'], datos['avenida'], datos['direccion'], 
+                 self.mercado_seleccionado)  # ← Usar variable guardada
         
         if execute_query(query, params):
             messagebox.showinfo("Éxito", "Mercado actualizado correctamente")
@@ -301,14 +321,21 @@ class GestionMercados:
     
     def eliminar_mercado(self):
         """Elimina (desactiva) el mercado seleccionado"""
-        seleccion = self.tree.selection()
-        if not seleccion:
-            messagebox.showwarning("Advertencia", "Seleccione un mercado para eliminar")
+        # ← CORREGIDO: Validar que haya un mercado seleccionado
+        if self.mercado_seleccionado is None:
+            messagebox.showwarning("Advertencia", 
+                "Seleccione un mercado de la tabla haciendo clic sobre él")
             return
         
-        item = self.tree.item(seleccion[0])
-        id_mercado = item['values'][0]
-        nombre = item['values'][1]
+        # Obtener nombre del mercado para el mensaje de confirmación
+        if self.df_mercados is not None:
+            mercado = self.df_mercados[self.df_mercados['id'] == self.mercado_seleccionado]
+            if len(mercado) > 0:
+                nombre = mercado.iloc[0]['nombre']
+            else:
+                nombre = "este mercado"
+        else:
+            nombre = "este mercado"
         
         respuesta = messagebox.askyesno(
             "Confirmar",
@@ -319,7 +346,7 @@ class GestionMercados:
         if respuesta:
             query = "UPDATE mercado SET activo = FALSE WHERE id_mercado = %s;"
             
-            if execute_query(query, (id_mercado,)):
+            if execute_query(query, (self.mercado_seleccionado,)):
                 messagebox.showinfo("Éxito", "Mercado desactivado correctamente")
                 self.limpiar_formulario()
                 self.cargar_mercados()
@@ -330,6 +357,13 @@ class GestionMercados:
         """Limpia todos los campos del formulario"""
         for entry in self.entries.values():
             entry.delete(0, tk.END)
+        
+        # ← AGREGADO: Limpiar la variable de selección
+        self.mercado_seleccionado = None
+        
+        # Quitar tags visuales de todas las filas
+        for item in self.tree.get_children():
+            self.tree.item(item, tags=())
         
         # Deseleccionar en el tree
         for item in self.tree.selection():

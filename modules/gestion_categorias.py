@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from database.connection import execute_query
+from database.connection import execute_query, DatabaseConnection
 import pandas as pd
 import numpy as np
 
@@ -285,53 +286,97 @@ class GestionCategorias:
 
         try:
             if self.modo_edicion and self.categoria_seleccionada:
-                query = """
-                UPDATE categorias
-                SET nombre = %s, descripcion = %s
-                WHERE id_categoria = %s
-                RETURNING id_categoria;
-                """
+                conn = DatabaseConnection.get_connection()
+                if not conn:
+                    messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+                    return
+            
+                try:
+                    cursor = conn.cursor()
+                    query = """
+                    UPDATE categorias
+                    SET nombre = %s, descripcion = %s
+                    WHERE id_categoria = %s
+                    RETURNING id_categoria;
+                    """
+                
+                    cursor.execute(query, (nombre, descripcion, int(self.categoria_seleccionada)))
+                    resultado = cursor.fetchone()
+                
+                    conn.commit()
+                
+                    cursor.close()
+                    DatabaseConnection.return_connection(conn)
+                
+                    if resultado:
+                        print(f"✓ Categoría actualizada: ID {resultado[0]}")
+                        messagebox.showinfo("Éxito", "Categoría actualizada correctamente")
+                        self.limpiar_formulario()
+                        self.frame_principal.after(100, self.cargar_categorias)
+                    else:
+                        print("❌ No se pudo actualizar")
+                        messagebox.showerror("Error", "No se pudo actualizar la categoría")
+                    
+                except Exception as e:
+                    print(f"❌ Error en UPDATE: {e}")
+                    conn.rollback()
+                    DatabaseConnection.return_connection(conn)
+                    messagebox.showerror("Error", f"Error al actualizar:\n{str(e)}")
         
-                resultado = execute_query(query, (nombre, descripcion, 
-                                                 int(self.categoria_seleccionada)), fetch=True)
-        
-                if resultado:
-                    print(f"✓ Categoría actualizada: ID {resultado[0][0]}")
-                    messagebox.showinfo("Éxito", "Categoría actualizada correctamente")
-                    self.limpiar_formulario()
-                    self.frame_principal.after(100, self.cargar_categorias)
-                else:
-                    print("❌ No se pudo actualizar")
-                    messagebox.showerror("Error", "No se pudo actualizar la categoría")
-    
             else:
-                query = """
-                INSERT INTO categorias (nombre, descripcion, activo)
-                VALUES (%s, %s, TRUE)
-                RETURNING id_categoria;
-                """
-        
-                resultado = execute_query(query, (nombre, descripcion), fetch=True)
-        
-                if resultado:
-                    nuevo_id = resultado[0][0]
-                    print(f"✓ Categoría agregada: ID {nuevo_id}")
+                # MODO INSERCIÓN - Usar conexión directa con commit
+                conn = DatabaseConnection.get_connection()
+                if not conn:
+                    messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+                    return
+            
+                try:
+                    cursor = conn.cursor()
+                    query = """
+                    INSERT INTO categorias (nombre, descripcion, activo)
+                    VALUES (%s, %s, TRUE)
+                    RETURNING id_categoria;
+                    """
                 
-                    messagebox.showinfo("Éxito", 
-                        f"✓ Categoría '{nombre}' agregada correctamente\n"
-                        f"ID asignado: {nuevo_id}")
+                    cursor.execute(query, (nombre, descripcion))
+                    resultado = cursor.fetchone()
                 
-                    self.limpiar_formulario()
-                    print("⏳ Esperando 100ms antes de recargar...")
-                    self.frame_principal.after(100, self.cargar_categorias)
-                else:
-                    print("❌ No se pudo agregar")
-                    messagebox.showerror("Error", 
-                        "No se pudo agregar la categoría.\n"
-                        "Puede que ya exista una con ese nombre.")
+                    # ✅ COMMIT EXPLÍCITO
+                    conn.commit()
+                
+                    cursor.close()
+                    DatabaseConnection.return_connection(conn)
+                
+                    if resultado:
+                        nuevo_id = resultado[0]
+                        print(f"✓ Categoría agregada: ID {nuevo_id}")
+                    
+                        messagebox.showinfo("Éxito", 
+                            f"✓ Categoría '{nombre}' agregada correctamente\n"
+                            f"ID asignado: {nuevo_id}")
+                    
+                        self.limpiar_formulario()
+                        print("⏳ Recargando categorías...")
+                        self.cargar_categorias()  
+                    else:
+                        print("❌ No se pudo agregar")
+                        messagebox.showerror("Error", "No se pudo agregar la categoría")
+                    
+                except Exception as e:
+                    print(f"❌ Error en INSERT: {e}")
+                    if conn:
+                        conn.rollback()
+                        DatabaseConnection.return_connection(conn)
+                
+                    
+                    if "unique" in str(e).lower() or "duplicate" in str(e).lower():
+                        messagebox.showerror("Error", 
+                            f"Ya existe una categoría con el nombre '{nombre}'")
+                    else:
+                        messagebox.showerror("Error", f"Error al agregar:\n{str(e)}")
 
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"❌ Error general: {e}")
             import traceback
             traceback.print_exc()
             messagebox.showerror("Error", f"Error al procesar:\n{str(e)}")
