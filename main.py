@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import font
 from PIL import Image, ImageTk
-import time
 from tkinter import messagebox
 from database.connection import DatabaseConnection  
 from modules.gestion import GestionProductos
