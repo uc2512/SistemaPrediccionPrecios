@@ -103,8 +103,7 @@ class SistemaMercado:
         info_y = 350
         
         self.canvas.create_rectangle(145, info_y-25, 275, info_y+30, 
-                                     fill="#0f1419", outline="#10b981", width=1,
-                                     tags="card1")
+                                     fill="#0f1419", outline="#10b981", width=1)
         self.canvas.create_text(210, info_y-8, 
                                text="📈", 
                                font=("Arial", 20))
@@ -115,8 +114,7 @@ class SistemaMercado:
         
         
         self.canvas.create_rectangle(320, info_y-25, 580, info_y+30, 
-                                     fill="#0f1419", outline="#8b5cf6", width=1,
-                                     tags="card2")
+                                     fill="#0f1419", outline="#8b5cf6", width=1)
         self.canvas.create_text(450, info_y-8, 
                                text="🗄️", 
                                font=("Arial", 20))
@@ -127,8 +125,7 @@ class SistemaMercado:
         
        
         self.canvas.create_rectangle(625, info_y-25, 755, info_y+30, 
-                                     fill="#0f1419", outline="#f59e0b", width=1,
-                                     tags="card3")
+                                     fill="#0f1419", outline="#f59e0b", width=1)
         self.canvas.create_text(690, info_y-8, 
                                text="🔮", 
                                font=("Arial", 20))
@@ -136,16 +133,6 @@ class SistemaMercado:
                                text="Predicción Inteligente", 
                                font=("Arial", 9, "bold"), 
                                fill="#e2e8f0")
-        
-        
-        self.canvas.tag_bind("card1", "<Enter>", lambda e: self.hover_card(145, info_y-25, 275, info_y+30, "#10b981"))
-        self.canvas.tag_bind("card1", "<Leave>", lambda e: self.leave_card(145, info_y-25, 275, info_y+30, "#10b981"))
-        
-        self.canvas.tag_bind("card2", "<Enter>", lambda e: self.hover_card(320, info_y-25, 580, info_y+30, "#8b5cf6"))
-        self.canvas.tag_bind("card2", "<Leave>", lambda e: self.leave_card(320, info_y-25, 580, info_y+30, "#8b5cf6"))
-        
-        self.canvas.tag_bind("card3", "<Enter>", lambda e: self.hover_card(625, info_y-25, 755, info_y+30, "#f59e0b"))
-        self.canvas.tag_bind("card3", "<Leave>", lambda e: self.leave_card(625, info_y-25, 755, info_y+30, "#f59e0b"))
         
        
         self.btn_inicio = tk.Button(
@@ -165,10 +152,6 @@ class SistemaMercado:
         )
         self.btn_inicio.place(x=450, y=430, anchor="center")
         
-        
-        self.btn_inicio.bind("<Enter>", self.hover_enter)
-        self.btn_inicio.bind("<Leave>", self.hover_leave)
-        
         self.canvas.create_text(450, 490, 
                                text="INTEGRANTES", 
                                font=("Arial", 9, "bold"), 
@@ -181,235 +164,11 @@ class SistemaMercado:
                                font=("Arial", 8), fill="white", anchor="center")
         self.canvas.create_text(450, 535, text=nombres_linea2, 
                                font=("Arial", 8), fill="white", anchor="center")
-        
-        self.animar_entrada()
-    
-    def hover_card(self, x1, y1, x2, y2, color):
-        items = self.canvas.find_overlapping(x1, y1, x2, y2)
-        for item in items:
-            if self.canvas.type(item) == "rectangle":
-                self.canvas.itemconfig(item, fill="#1e293b", width=2)
-    
-    def leave_card(self, x1, y1, x2, y2, color):
-        items = self.canvas.find_overlapping(x1, y1, x2, y2)
-        for item in items:
-            if self.canvas.type(item) == "rectangle":
-                self.canvas.itemconfig(item, fill="#0f1419", width=1)
-    
-    def animar_entrada(self):
-        """Animación sutil de aparición"""
-        pass  
-    
-    def hover_enter(self, event):
-        self.btn_inicio.config(bg="#2563eb", padx=50, pady=17)
-    
-    def hover_leave(self, event):
-        self.btn_inicio.config(bg="#3b82f6", padx=45, pady=15)
     
     def iniciar_sistema(self):
         self.btn_inicio.place_forget()
-        self.mostrar_pantalla_carga()
+        self.mostrar_menu_principal()
     
-    def mostrar_pantalla_carga(self):
-        self.canvas.delete("all")
-    
-       
-        if self.logo_izquierdo:
-            self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
-        if self.logo_derecho:
-            self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
-    
-        self.particulas = []
-        import random
-        for i in range(15): 
-            x = random.randint(100, 800)
-            y = random.randint(150, 550)
-            size = random.randint(2, 5)
-            particula = self.canvas.create_oval(
-                x, y, x+size, y+size,
-                fill="#10b981", outline="",
-                tags="particula"
-            )
-            self.particulas.append({
-                'id': particula,
-                'x': x,
-                'y': y,
-                'velocidad': random.uniform(0.3, 0.8),
-                'direccion': random.choice([-1, 1])
-            })
-    
-        self.canvas.create_text(450, 200, 
-                            text="Inicializando Sistema", 
-                            font=("Arial", 26, "bold"), 
-                            fill="#e2e8f0",
-                            tags="carga_texto")
-    
-        self.canvas.create_text(450, 235, 
-                            text="Preparando módulos y conexiones", 
-                            font=("Arial", 12), 
-                            fill="#94a3b8")
-    
-        self.canvas.create_rectangle(202, 282, 702, 317, 
-                                    fill="#0a0f1e", outline="",
-                                    tags="barra_sombra")
-    
-        self.canvas.create_rectangle(200, 280, 700, 315, 
-                                    fill="#1e293b", outline="#334155", width=2,
-                                    tags="barra_fondo")
-    
-        self.canvas.create_rectangle(202, 282, 698, 290, 
-                                    fill="#2d3748", outline="",
-                                    tags="barra_brillo_interno")
-    
-        self.barra_progreso = self.canvas.create_rectangle(200, 280, 200, 315, 
-                                                        fill="#10b981", outline="",
-                                                        tags="barra_progreso")
-    
-        self.barra_brillo = self.canvas.create_rectangle(200, 280, 200, 290,
-                                                        fill="#34d399", outline="",
-                                                        tags="barra_brillo")
-    
-        self.barra_borde = self.canvas.create_rectangle(200, 280, 200, 315,
-                                                        outline="#059669", width=2,
-                                                        tags="barra_borde")
-    
-        self.texto_porcentaje = self.canvas.create_text(450, 350, 
-                                                        text="0%", 
-                                                        font=("Arial", 16, "bold"), 
-                                                        fill="#10b981",  # Verde
-                                                        tags="porcentaje")
-    
-        self.texto_estado = self.canvas.create_text(450, 390, 
-                                                    text="⚙️ Conectando a base de datos...", 
-                                                    font=("Arial", 11), 
-                                                    fill="#94a3b8",
-                                                    tags="estado")
-    
-        self.puntos_carga = self.canvas.create_text(450, 430, 
-                                                    text="●", 
-                                                    font=("Arial", 18), 
-                                                    fill="#10b981",  # Verde
-                                                    tags="puntos")
-    
-        self.anillo_pulso = self.canvas.create_oval(440, 420, 460, 440,
-                                                    outline="#10b981", width=2,
-                                                    tags="anillo_pulso")
-    
-        self.canvas.create_line(150, 300, 190, 300, fill="#10b981", width=2, tags="linea_izq")
-        self.canvas.create_line(710, 300, 750, 300, fill="#10b981", width=2, tags="linea_der")
-    
-        self.progreso = 0
-        self.estados_carga = [
-            "Conectando a base de datos...",
-            "Cargando módulos estadísticos...",
-            "Inicializando algoritmos de predicción...",
-            "Cargando estructuras de datos...",
-            "Preparando interfaz gráfica...",
-            "Finalizando configuración..."
-        ]
-        self.estado_actual = 0
-        self.pulso_dir = 1  
-        self.pulso_scale = 1.0
-    
-        self.animar_carga()
-        self.animar_particulas()
-        self.animar_pulso()
-
-    def animar_carga(self):
-        if self.progreso <= 100:
-            nuevo_ancho = 200 + (500 * self.progreso / 100)
-        
-            
-            self.canvas.coords(self.barra_progreso, 200, 280, nuevo_ancho, 315)
-        
-            brillo_ancho = max(200, nuevo_ancho - 10)
-            self.canvas.coords(self.barra_brillo, 200, 280, brillo_ancho, 290)
-        
-            self.canvas.coords(self.barra_borde, 200, 280, nuevo_ancho, 315)
-        
-            self.canvas.itemconfig(self.texto_porcentaje, text=f"{self.progreso}%")
-        
-            if self.progreso < 33:
-                self.canvas.itemconfig(self.texto_porcentaje, fill="#10b981")  # Verde
-            elif self.progreso < 66:
-                self.canvas.itemconfig(self.texto_porcentaje, fill="#34d399")  # Verde claro
-            else:
-                self.canvas.itemconfig(self.texto_porcentaje, fill="#059669")  # Verde oscuro
-        
-            if self.progreso % 17 == 0 and self.estado_actual < len(self.estados_carga):
-                self.canvas.itemconfig(self.texto_estado, text=self.estados_carga[self.estado_actual])
-                self.estado_actual += 1
-        
-            
-            puntos = ["●", "●●", "●●●"][int(self.progreso / 7) % 3]
-            self.canvas.itemconfig(self.puntos_carga, text=puntos)
-        
-           
-            if self.progreso % 10 == 0:
-                
-                self.canvas.coords("linea_izq", 150, 300, 190 - (self.progreso % 20), 300)
-                
-                self.canvas.coords("linea_der", 710 + (self.progreso % 20), 300, 750, 300)
-        
-            self.progreso += 2
-            self.root.after(50, self.animar_carga)
-        else:
-            
-            self.canvas.itemconfig(self.barra_progreso, fill="#059669")
-            self.canvas.itemconfig(self.texto_porcentaje, text="100%", fill="#059669")
-            self.root.after(500, self.mostrar_menu_principal)
-    def animar_particulas(self):
-        if self.progreso <= 100:
-            import random
-            for p in self.particulas:
-                
-                p['y'] += p['velocidad'] * p['direccion']
-                
-                
-                if p['y'] < 150:
-                    p['y'] = 550
-                    p['x'] = random.randint(100, 800)
-                elif p['y'] > 550:
-                    p['y'] = 150
-                    p['x'] = random.randint(100, 800)
-                
-                
-                coords = self.canvas.coords(p['id'])
-                if coords:
-                    size = coords[2] - coords[0]
-                    self.canvas.coords(p['id'], p['x'], p['y'], p['x']+size, p['y']+size)
-                
-               
-                if random.random() > 0.95:
-                    colores = ["#10b981", "#34d399", "#059669", "#064e3b"]
-                    self.canvas.itemconfig(p['id'], fill=random.choice(colores))
-            
-            self.root.after(50, self.animar_particulas)
-
-    def animar_pulso(self):
-        """Anima el anillo pulsante alrededor de los puntos"""
-        if self.progreso <= 100:
-            # Escalar el anillo
-            self.pulso_scale += 0.05 * self.pulso_dir
-            
-            if self.pulso_scale >= 1.3:
-                self.pulso_dir = -1
-            elif self.pulso_scale <= 1.0:
-                self.pulso_dir = 1
-            
-           
-            base_size = 20
-            nuevo_size = base_size * self.pulso_scale
-            offset = nuevo_size / 2
-            
-            self.canvas.coords(self.anillo_pulso,
-                            450 - offset, 430 - offset,
-                            450 + offset, 430 + offset)
-            
-            nuevo_width = max(1, int(3 - (self.pulso_scale - 1) * 3))
-            self.canvas.itemconfig(self.anillo_pulso, width=nuevo_width)
-            
-            self.root.after(50, self.animar_pulso)
     def mostrar_menu_principal(self):
         self.canvas.delete("all")
         
@@ -455,8 +214,6 @@ class SistemaMercado:
         
        
         self.crear_boton_footer(450, 490, "Salir", "#dc2626", self.salir_sistema)
-        
-       
     
     def crear_tarjeta_modulo(self, x, y, icono, titulo, descripcion, color, comando):
         
@@ -487,20 +244,9 @@ class SistemaMercado:
         
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Button-1>", lambda e: comando())
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Enter>", 
-            lambda e: self.hover_tarjeta_enter(tarjeta_id, color))
+            lambda e: self.canvas.config(cursor="hand2"))
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Leave>", 
-            lambda e: self.hover_tarjeta_leave(tarjeta_id))
-        
-        self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Enter>", 
-            lambda e: self.canvas.config(cursor="hand2"), add="+")
-        self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Leave>", 
-            lambda e: self.canvas.config(cursor=""), add="+")
-    
-    def hover_tarjeta_enter(self, tarjeta_id, color):
-        self.canvas.itemconfig(tarjeta_id, fill="#334155", width=3)
-    
-    def hover_tarjeta_leave(self, tarjeta_id):
-        self.canvas.itemconfig(tarjeta_id, fill="#1e293b", width=2)
+            lambda e: self.canvas.config(cursor=""))
     
     def crear_boton_footer(self, x, y, texto, color, comando):
         btn = tk.Button(self.frame_principal,
@@ -516,14 +262,6 @@ class SistemaMercado:
                        pady=10,
                        command=comando)
         btn.place(x=x, y=y, anchor="center")
-        
-        def on_enter(e):
-            btn.config(bg="#1e293b" if "Configuración" in texto else "#991b1b")
-        def on_leave(e):
-            btn.config(bg=color)
-        
-        btn.bind("<Enter>", on_enter)
-        btn.bind("<Leave>", on_leave)
     
     def modulo_gestion(self):
         for widget in self.frame_principal.winfo_children():
