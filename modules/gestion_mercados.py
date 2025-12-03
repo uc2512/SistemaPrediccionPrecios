@@ -12,13 +12,13 @@ class GestionMercados:
         self.volver_menu = volver_menu
         
         # Variables
-        self.df_mercados = None  # DataFrame para almacenar mercados
-        self.mercado_seleccionado = None  # ← AGREGADO: Variable para guardar ID
+        self.df_mercados = None
+        self.mercado_seleccionado = None
+        self.item_seleccionado = None  # ← NUEVO: Guardar item del tree
         
         self.canvas.delete("all")
         self.crear_interfaz()
         self.cargar_mercados()
-        
     
     def crear_interfaz(self):
         """Crea la interfaz de gestión de mercados"""
@@ -132,12 +132,12 @@ class GestionMercados:
         columnas = ["ID", "Nombre", "Ciudad", "Departamento", "Barrio", "Avenida", "Estado"]
         anchos = np.array([40, 180, 100, 100, 100, 100, 80])
         
-        # Treeview
+        # Treeview con selectmode='browse' para asegurar selección
         self.tree = ttk.Treeview(self.frame_tabla,
                                 columns=columnas,
                                 show="headings",
                                 yscrollcommand=scrollbar.set,
-                                style="Mercados.Treeview",  # ← Estilo específico
+                                selectmode='browse',  # ← CRÍTICO: Modo de selección
                                 height=8)
         
         scrollbar.config(command=self.tree.yview)
@@ -150,27 +150,34 @@ class GestionMercados:
         
         self.tree.pack(fill=tk.BOTH, expand=True)
         
-        # Evento de selección
+        # ← CRÍTICO: Múltiples eventos para asegurar captura
         self.tree.bind("<<TreeviewSelect>>", self.seleccionar_mercado)
+        self.tree.bind("<ButtonRelease-1>", self.on_click)  # Click del mouse
+        self.tree.bind("<space>", self.seleccionar_mercado)  # Tecla espacio
+        self.tree.bind("<Return>", self.seleccionar_mercado)  # Tecla Enter
         
-        # Configurar tag para fila seleccionada con color más visible
-        self.tree.tag_configure('selected', background='#3b82f6', foreground='white')
+        # Configurar tag para selección visual MUY VISIBLE
+        self.tree.tag_configure('selected', 
+                               background='#3b82f6', 
+                               foreground='white')
         
-        # Estilo del Treeview
+        # Estilo del Treeview - MÁS VISIBLE
         style = ttk.Style()
         style.theme_use("clam")
         
-        # Estilo específico para esta tabla
-        style.configure("Mercados.Treeview",
+        style.configure("Treeview",
                        background="#0f172a",
                        foreground="white",
                        fieldbackground="#0f172a",
                        borderwidth=0,
-                       rowheight=25)
-        style.map("Mercados.Treeview",
-                 background=[("selected", "#3b82f6")],
-                 foreground=[("selected", "white")])
-        style.configure("Mercados.Treeview.Heading",
+                       rowheight=28)  # ← Filas más altas
+        
+        # Colores de selección MUY VISIBLES
+        style.map("Treeview",
+                 background=[('selected', '#3b82f6'), ('active', '#2563eb')],
+                 foreground=[('selected', 'white'), ('active', 'white')])
+        
+        style.configure("Treeview.Heading",
                        background="#1e293b",
                        foreground="white",
                        borderwidth=1,
@@ -187,9 +194,23 @@ class GestionMercados:
                                     command=self.volver)
         self.btn_volver.place(x=380, y=550)
     
+    def on_click(self, event):
+        """Maneja clicks del mouse directamente"""
+        # Identificar qué fila fue clickeada
+        item = self.tree.identify_row(event.y)
+        if item:
+            # Forzar selección
+            self.tree.selection_set(item)
+            self.tree.focus(item)
+            # Llamar manualmente al manejador
+            self.seleccionar_mercado(event)
+            print(f"🖱️ Click detectado en item: {item}")
+    
     def cargar_mercados(self):
         """Carga mercados usando pandas"""
-        self.tree.delete(*self.tree.get_children())
+        # Limpiar selección anterior
+        for item in self.tree.get_children():
+            self.tree.delete(item)
         
         query = """
         SELECT id_mercado, nombre_mercado, ciudad, departamento, 
@@ -210,10 +231,11 @@ class GestionMercados:
             
             # Insertar en tabla
             for row in self.df_mercados.itertuples(index=False):
-                self.tree.insert("", tk.END, values=(
+                item_id = self.tree.insert("", tk.END, values=(
                     row.id, row.nombre, row.ciudad, row.depto,
                     row.barrio, row.avenida, row.estado_texto
                 ))
+                print(f"📊 Insertado: {row.nombre} con ID {row.id}")
     
     def obtener_datos_formulario(self):
         """Obtiene datos del formulario como diccionario"""
@@ -244,26 +266,49 @@ class GestionMercados:
             messagebox.showerror("Error", "No se pudo agregar el mercado")
     
     def seleccionar_mercado(self, event):
-        """Llena el formulario con el mercado seleccionado usando pandas"""
+        """Llena el formulario con el mercado seleccionado"""
+        print("🔍 seleccionar_mercado() llamado")
+        
         seleccion = self.tree.selection()
-        if seleccion:
-            # Quitar tags de filas anteriores
-            for item in self.tree.get_children():
-                self.tree.item(item, tags=())
-            
-            item = self.tree.item(seleccion[0])
-            valores = item['values']
-            
-            # ← CORREGIDO: Guardar ID del mercado seleccionado
-            self.mercado_seleccionado = valores[0]
-            print(f"✓ Mercado seleccionado: ID {self.mercado_seleccionado}")
-            
-            # Aplicar tag de selección visual
-            self.tree.item(seleccion[0], tags=('selected',))
-            
-            # Buscar en DataFrame si existe
-            if self.df_mercados is not None:
+        print(f"   Selección actual: {seleccion}")
+        
+        if not seleccion:
+            print("   ⚠️ No hay selección")
+            return
+        
+        # Quitar tags de TODAS las filas
+        for item in self.tree.get_children():
+            self.tree.item(item, tags=())
+        
+        # Obtener datos del item seleccionado
+        self.item_seleccionado = seleccion[0]
+        item_data = self.tree.item(self.item_seleccionado)
+        valores = item_data['values']
+        
+        print(f"   ✅ Valores obtenidos: {valores}")
+        
+        # Guardar ID del mercado
+        self.mercado_seleccionado = valores[0]
+        print(f"   💾 ID guardado: {self.mercado_seleccionado}")
+        
+        # Aplicar tag visual AZUL BRILLANTE
+        self.tree.item(self.item_seleccionado, tags=('selected',))
+        
+        # Cambiar color de fondo también con itemconfig
+        try:
+            self.tree.tag_configure('selected', background='#3b82f6', foreground='white')
+            print("   🎨 Tag 'selected' aplicado")
+        except Exception as e:
+            print(f"   ❌ Error aplicando tag: {e}")
+        
+        # Buscar en DataFrame y llenar formulario
+        if self.df_mercados is not None:
+            try:
                 mercado = self.df_mercados[self.df_mercados['id'] == valores[0]].iloc[0]
+                
+                # Limpiar formulario primero
+                for entry in self.entries.values():
+                    entry.delete(0, tk.END)
                 
                 # Mapear campos
                 campos_map = {
@@ -275,21 +320,30 @@ class GestionMercados:
                 }
                 
                 # Llenar formulario
-                self.limpiar_formulario()
                 for key, col in campos_map.items():
                     valor = mercado[col]
                     if pd.notna(valor):
                         self.entries[key].insert(0, str(valor))
+                        print(f"   📝 {key}: {valor}")
                 
                 # Cargar dirección completa
                 query = "SELECT direccion FROM mercado WHERE id_mercado = %s;"
                 resultado = execute_query(query, (valores[0],), fetch=True)
                 if resultado and resultado[0][0]:
                     self.entries['direccion'].insert(0, resultado[0][0])
+                    print(f"   📝 direccion: {resultado[0][0]}")
+                
+                print("   ✅ Formulario llenado correctamente")
+                
+            except Exception as e:
+                print(f"   ❌ Error llenando formulario: {e}")
+                import traceback
+                traceback.print_exc()
     
     def editar_mercado(self):
         """Edita el mercado seleccionado"""
-        # ← CORREGIDO: Validar que haya un mercado seleccionado
+        print(f"🔧 editar_mercado() - ID seleccionado: {self.mercado_seleccionado}")
+        
         if self.mercado_seleccionado is None:
             messagebox.showwarning("Advertencia", 
                 "Seleccione un mercado de la tabla haciendo clic sobre él")
@@ -310,7 +364,7 @@ class GestionMercados:
         
         params = (datos['nombre'], datos['ciudad'], datos['departamento'],
                  datos['barrio'], datos['avenida'], datos['direccion'], 
-                 self.mercado_seleccionado)  # ← Usar variable guardada
+                 self.mercado_seleccionado)
         
         if execute_query(query, params):
             messagebox.showinfo("Éxito", "Mercado actualizado correctamente")
@@ -321,21 +375,19 @@ class GestionMercados:
     
     def eliminar_mercado(self):
         """Elimina (desactiva) el mercado seleccionado"""
-        # ← CORREGIDO: Validar que haya un mercado seleccionado
+        print(f"🗑️ eliminar_mercado() - ID seleccionado: {self.mercado_seleccionado}")
+        
         if self.mercado_seleccionado is None:
             messagebox.showwarning("Advertencia", 
                 "Seleccione un mercado de la tabla haciendo clic sobre él")
             return
         
-        # Obtener nombre del mercado para el mensaje de confirmación
+        # Obtener nombre del mercado
+        nombre = "este mercado"
         if self.df_mercados is not None:
             mercado = self.df_mercados[self.df_mercados['id'] == self.mercado_seleccionado]
             if len(mercado) > 0:
                 nombre = mercado.iloc[0]['nombre']
-            else:
-                nombre = "este mercado"
-        else:
-            nombre = "este mercado"
         
         respuesta = messagebox.askyesno(
             "Confirmar",
@@ -355,19 +407,23 @@ class GestionMercados:
     
     def limpiar_formulario(self):
         """Limpia todos los campos del formulario"""
+        print("🧹 Limpiando formulario...")
+        
         for entry in self.entries.values():
             entry.delete(0, tk.END)
         
-        # ← AGREGADO: Limpiar la variable de selección
+        # Limpiar variables de selección
         self.mercado_seleccionado = None
+        self.item_seleccionado = None
         
         # Quitar tags visuales de todas las filas
         for item in self.tree.get_children():
             self.tree.item(item, tags=())
         
         # Deseleccionar en el tree
-        for item in self.tree.selection():
-            self.tree.selection_remove(item)
+        self.tree.selection_remove(*self.tree.selection())
+        
+        print("   ✅ Formulario limpiado")
     
     def volver(self):
         """Vuelve al menú principal"""
