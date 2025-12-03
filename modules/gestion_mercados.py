@@ -23,7 +23,7 @@ class GestionMercados:
     def crear_interfaz(self):
         
         self.canvas.create_text(450, 30, 
-                               text="🏪 GESTIÓN DE MERCADOS", 
+                               text="GESTIÓN DE MERCADOS", 
                                font=("Arial", 20, "bold"), 
                                fill="#e2e8f0")
         

@@ -11,25 +11,19 @@ class GestionProductos:
         self.frame = parent_frame
         self.volver_callback = volver_callback
         
-        # Variables del formulario
         self.producto_seleccionado = None
         self.modo_edicion = False
-        self.df_productos = None  # DataFrame para almacenar productos
+        self.df_productos = None  
         
-        # Limpiar canvas
         self.canvas.delete("all")
         
-        # Crear interfaz
         self.crear_interfaz()
         self.cargar_productos()
         
     
     def crear_interfaz(self):
-        """Crea la interfaz completa del módulo"""
-        
-        # Header
         self.canvas.create_text(450, 30, 
-                               text="📊 Gestión de Productos", 
+                               text="Gestión de Productos", 
                                font=("Arial", 20, "bold"), 
                                fill="#10b981")
         
@@ -38,16 +32,12 @@ class GestionProductos:
                                font=("Arial", 10), 
                                fill="#94a3b8")
         
-        # Línea divisoria
         self.canvas.create_line(50, 75, 850, 75, fill="#334155", width=2)
         
-        # Frame para formulario (izquierda)
         self.crear_formulario()
         
-        # Frame para tabla (derecha)
         self.crear_tabla()
-        
-        # Botón volver
+    
         btn_volver = tk.Button(
             self.frame,
             text="← Volver al Menú",
@@ -64,9 +54,7 @@ class GestionProductos:
         btn_volver.place(x=50, y=560)
     
     def crear_formulario(self):
-        """Crea el formulario de entrada de datos"""
         
-        # Fondo del formulario
         self.canvas.create_rectangle(50, 100, 350, 540, 
                                      fill="#1e293b", outline="#10b981", width=2)
         
@@ -74,12 +62,9 @@ class GestionProductos:
                                text="FORMULARIO DE PRODUCTO", 
                                font=("Arial", 11, "bold"), 
                                fill="#e2e8f0")
-        
-        # Labels y campos
         y_start = 160
         y_gap = 70
         
-        # Nombre del producto
         self.canvas.create_text(80, y_start, 
                                text="Nombre:", 
                                font=("Arial", 9, "bold"), 
@@ -90,7 +75,6 @@ class GestionProductos:
                                      relief=tk.FLAT, width=25)
         self.entry_nombre.place(x=80, y=y_start + 10)
         
-        # Categoría
         y_start += y_gap
         self.canvas.create_text(80, y_start, 
                                text="Categoría:", 
@@ -106,7 +90,6 @@ class GestionProductos:
         self.combo_categoria.place(x=80, y=y_start + 10)
         self.cargar_categorias()
         
-        # Unidad de medida
         y_start += y_gap
         self.canvas.create_text(80, y_start, 
                                text="Unidad:", 
@@ -123,7 +106,6 @@ class GestionProductos:
         self.combo_unidad.place(x=80, y=y_start + 10)
         self.combo_unidad.current(0)
         
-        # Descripción
         y_start += y_gap
         self.canvas.create_text(80, y_start, 
                                text="Descripción:", 
@@ -143,7 +125,6 @@ class GestionProductos:
         )
         self.text_descripcion.place(x=80, y=y_start + 10)
         
-        # Botones de acción
         y_botones = 480
         
         self.btn_agregar = tk.Button(
@@ -175,9 +156,6 @@ class GestionProductos:
         self.btn_limpiar.place(x=190, y=y_botones)
     
     def crear_tabla(self):
-        """Crea la tabla para mostrar productos usando pandas para configuración"""
-        
-        # Fondo de la tabla
         self.canvas.create_rectangle(370, 100, 850, 540, 
                                      fill="#1e293b", outline="#10b981", width=2)
         
@@ -186,19 +164,15 @@ class GestionProductos:
                                font=("Arial", 11, "bold"), 
                                fill="#e2e8f0")
         
-        # Frame para contener el Treeview y scrollbar
         frame_tabla = tk.Frame(self.frame, bg="#1e293b")
         frame_tabla.place(x=385, y=145, width=450, height=340)
         
-        # Scrollbar
         scrollbar = tk.Scrollbar(frame_tabla)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Configuración de columnas con numpy array para dimensiones
         columnas = ["ID", "Nombre", "Categoría", "Unidad"]
         anchos = np.array([40, 180, 120, 80])
         
-        # Treeview (tabla)
         self.tree = ttk.Treeview(
             frame_tabla,
             columns=columnas,
@@ -209,7 +183,6 @@ class GestionProductos:
         
         scrollbar.config(command=self.tree.yview)
         
-        # Configurar columnas usando numpy para iterar
         for i, col in enumerate(columnas):
             self.tree.heading(col, text=col)
             anchor = "center" if i in [0, 3] else "w"
@@ -217,7 +190,6 @@ class GestionProductos:
         
         self.tree.pack(fill=tk.BOTH, expand=True)
         
-        # Estilo de la tabla
         style = ttk.Style()
         style.theme_use("clam")
         style.configure("Treeview",
@@ -227,15 +199,13 @@ class GestionProductos:
                        borderwidth=0)
         style.map('Treeview', background=[('selected', '#10b981')])
         
-        # Evento de selección
         self.tree.bind('<<TreeviewSelect>>', self.on_select)
         
-        # Botones de acción para la tabla
         y_btn = 500
         
         self.btn_editar = tk.Button(
             self.frame,
-            text="✎ Editar",
+            text="Editar",
             font=("Arial", 9, "bold"),
             bg="#f59e0b",
             fg="white",
@@ -249,7 +219,7 @@ class GestionProductos:
         
         self.btn_eliminar = tk.Button(
             self.frame,
-            text="✗ Eliminar",
+            text="Eliminar",
             font=("Arial", 9, "bold"),
             bg="#dc2626",
             fg="white",
@@ -263,7 +233,7 @@ class GestionProductos:
         
         self.btn_refrescar = tk.Button(
             self.frame,
-            text="↻ Refrescar",
+            text="Refrescar",
             font=("Arial", 9, "bold"),
             bg="#6366f1",
             fg="white",
@@ -276,12 +246,10 @@ class GestionProductos:
         self.btn_refrescar.place(x=730, y=y_btn)
     
     def cargar_categorias(self):
-        """Carga las categorías usando pandas"""
         query = "SELECT nombre FROM categorias ORDER BY nombre"
         categorias = execute_query(query, fetch=True)
         
         if categorias:
-            # Usar pandas para procesar rápidamente
             df_cat = pd.DataFrame(categorias, columns=['nombre'])
             nombres_categorias = df_cat['nombre'].tolist()
             
@@ -290,12 +258,9 @@ class GestionProductos:
                 self.combo_categoria.current(0)
     
     def cargar_productos(self):
-        """Carga productos usando pandas para mejor manejo de datos"""
-        # Limpiar tabla
         for item in self.tree.get_children():
             self.tree.delete(item)
         
-        # Consultar productos
         query = """
         SELECT id_producto, nombre_producto, categoria, unidad_medida
         FROM producto
@@ -306,17 +271,13 @@ class GestionProductos:
         productos = execute_query(query, fetch=True)
         
         if productos:
-            # Usar pandas DataFrame para procesar datos
             self.df_productos = pd.DataFrame(productos, 
                                             columns=['id', 'nombre', 'categoria', 'unidad'])
             
-            # Insertar en la tabla de forma eficiente
             for row in self.df_productos.itertuples(index=False):
                 self.tree.insert("", tk.END, values=row)
     
     def agregar_producto(self):
-        """Agrega o actualiza un producto con validación optimizada"""
-        # Obtener y validar datos usando dict comprehension
         datos = {
             'nombre': self.entry_nombre.get().strip(),
             'categoria': self.combo_categoria.get(),
@@ -324,7 +285,6 @@ class GestionProductos:
             'descripcion': self.text_descripcion.get("1.0", tk.END).strip()
         }
         
-        # Validación compacta
         if not datos['nombre']:
             messagebox.showwarning("Validación", "El nombre es obligatorio")
             return
@@ -335,7 +295,6 @@ class GestionProductos:
         
         try:
             if self.modo_edicion and self.producto_seleccionado:
-                # Actualizar producto existente
                 query = """
                 UPDATE producto 
                 SET nombre_producto = %s, categoria = %s, unidad_medida = %s, descripcion = %s
@@ -351,7 +310,6 @@ class GestionProductos:
                 else:
                     messagebox.showerror("Error", "No se pudo actualizar el producto")
             else:
-                # Insertar nuevo producto
                 query = """
                 INSERT INTO producto (nombre_producto, categoria, unidad_medida, descripcion)
                 VALUES (%s, %s, %s, %s)
@@ -369,7 +327,6 @@ class GestionProductos:
             messagebox.showerror("Error", f"Error al procesar: {str(e)}")
     
     def editar_producto(self):
-        """Prepara el formulario para editar usando pandas para búsqueda rápida"""
         seleccion = self.tree.selection()
         if not seleccion:
             messagebox.showwarning("Advertencia", "Seleccione un producto de la tabla")
@@ -378,35 +335,28 @@ class GestionProductos:
         item = self.tree.item(seleccion[0])
         valores = item['values']
         
-        # Usar pandas para búsqueda rápida si el DataFrame existe
         if self.df_productos is not None:
             producto = self.df_productos[self.df_productos['id'] == valores[0]].iloc[0]
             
-            # Cargar datos en el formulario
             self.producto_seleccionado = int(producto['id'])
             self.entry_nombre.delete(0, tk.END)
             self.entry_nombre.insert(0, producto['nombre'])
             
-            # Seleccionar categoría
             if pd.notna(producto['categoria']):
                 self.combo_categoria.set(producto['categoria'])
             
-            # Seleccionar unidad
             self.combo_unidad.set(producto['unidad'])
         
-        # Cargar descripción
         query = "SELECT descripcion FROM producto WHERE id_producto = %s"
         result = execute_query(query, (self.producto_seleccionado,), fetch=True)
         if result and result[0][0]:
             self.text_descripcion.delete("1.0", tk.END)
             self.text_descripcion.insert("1.0", result[0][0])
         
-        # Cambiar modo
         self.modo_edicion = True
         self.btn_agregar.config(text="✓ Actualizar", bg="#f59e0b")
     
     def eliminar_producto(self):
-        """Elimina (desactiva) un producto"""
         seleccion = self.tree.selection()
         if not seleccion:
             messagebox.showwarning("Advertencia", "Seleccione un producto de la tabla")
@@ -430,7 +380,6 @@ class GestionProductos:
                 messagebox.showerror("Error", "No se pudo eliminar el producto")
     
     def limpiar_formulario(self):
-        """Limpia todos los campos del formulario"""
         self.entry_nombre.delete(0, tk.END)
         if self.combo_categoria['values']:
             self.combo_categoria.current(0)
@@ -441,15 +390,11 @@ class GestionProductos:
         self.btn_agregar.config(text="✓ Agregar", bg="#10b981")
     
     def on_select(self, event):
-        """Evento cuando se selecciona un item de la tabla"""
         pass
     
     def volver_menu(self):
-        """Vuelve al menú principal"""
-        # Limpiar widgets
         for widget in self.frame.winfo_children():
             if widget != self.canvas:
                 widget.destroy()
         
-        # Llamar al callback
         self.volver_callback()

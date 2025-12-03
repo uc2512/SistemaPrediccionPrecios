@@ -44,7 +44,7 @@ class GestionPredicciones:
             )
     
     def crear_interfaz_principal(self):
-        self.canvas.create_text(450, 30, text="🔮 PREDICCIONES DE PRECIOS",
+        self.canvas.create_text(450, 30, text="PREDICCIONES DE PRECIOS",
             font=("Arial", 20, "bold"), fill="#e2e8f0")
         
         self.canvas.create_text(450, 55, text="Proyección inteligente basada en datos históricos",

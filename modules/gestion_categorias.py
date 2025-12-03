@@ -20,7 +20,7 @@ class GestionCategorias:
         self.cargar_categorias()
     
     def crear_interfaz(self):
-        self.canvas.create_text(450, 30, text="📋 GESTIÓN DE CATEGORÍAS",
+        self.canvas.create_text(450, 30, text="GESTIÓN DE CATEGORÍAS",
                                font=("Arial", 20, "bold"), fill="#e2e8f0")
         
         self.canvas.create_text(450, 55, text="Clasificación de productos del mercado",

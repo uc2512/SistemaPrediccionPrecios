@@ -16,7 +16,7 @@ class GestionConsultas:
         self.crear_interfaz_principal()
     
     def crear_interfaz_principal(self):
-        self.canvas.create_text(450, 30, text="🔍 CONSULTAS Y REPORTES",
+        self.canvas.create_text(450, 30, text="CONSULTAS Y REPORTES",
             font=("Arial", 20, "bold"), fill="#e2e8f0")
         
         self.canvas.create_text(450, 55, text="Búsqueda avanzada y generación de reportes",

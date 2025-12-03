@@ -69,9 +69,7 @@ class DatabaseConnection:
                     cls.return_connection(conn)
                 return False
         return False
-
-
-# Función auxiliar para ejecutar consultas
+    
 def execute_query(query, params=None, fetch=False):
     conn = DatabaseConnection.get_connection()
     if not conn:

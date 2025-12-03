@@ -38,7 +38,7 @@ class AnalisisEstadistico:
         print(f"✓ Productos con ofertas: {len(self.df_productos) if self.df_productos is not None else 0}")
     
     def crear_interfaz(self):
-        self.canvas.create_text(450, 30, text="📈 ANÁLISIS ESTADÍSTICO", 
+        self.canvas.create_text(450, 30, text="ANÁLISIS ESTADÍSTICO", 
                                font=("Arial", 20, "bold"), fill="#e2e8f0")
         
         self.canvas.create_text(450, 55, 

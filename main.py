@@ -51,7 +51,6 @@ class SistemaMercado:
         self.root.geometry(f'{ancho}x{alto}+{x}+{y}')
     
     def cargar_logo(self, ruta_imagen, ancho=80, alto=80):
-        """Carga y redimensiona una imagen"""
         try:
             imagen = Image.open(ruta_imagen)
             imagen = imagen.resize((ancho, alto), Image.Resampling.LANCZOS)
@@ -186,14 +185,12 @@ class SistemaMercado:
         self.animar_entrada()
     
     def hover_card(self, x1, y1, x2, y2, color):
-        """Efecto hover suave en las tarjetas"""
         items = self.canvas.find_overlapping(x1, y1, x2, y2)
         for item in items:
             if self.canvas.type(item) == "rectangle":
                 self.canvas.itemconfig(item, fill="#1e293b", width=2)
     
     def leave_card(self, x1, y1, x2, y2, color):
-        """Revertir efecto hover"""
         items = self.canvas.find_overlapping(x1, y1, x2, y2)
         for item in items:
             if self.canvas.type(item) == "rectangle":
@@ -303,12 +300,12 @@ class SistemaMercado:
     
         self.progreso = 0
         self.estados_carga = [
-            "⚙️ Conectando a base de datos...",
-            "📊 Cargando módulos estadísticos...",
-            "🔮 Inicializando algoritmos de predicción...",
-            "🗂️ Cargando estructuras de datos...",
-            "🎨 Preparando interfaz gráfica...",
-            "✅ Finalizando configuración..."
+            "Conectando a base de datos...",
+            "Cargando módulos estadísticos...",
+            "Inicializando algoritmos de predicción...",
+            "Cargando estructuras de datos...",
+            "Preparando interfaz gráfica...",
+            "Finalizando configuración..."
         ]
         self.estado_actual = 0
         self.pulso_dir = 1  
@@ -362,7 +359,6 @@ class SistemaMercado:
             self.canvas.itemconfig(self.texto_porcentaje, text="100%", fill="#059669")
             self.root.after(500, self.mostrar_menu_principal)
     def animar_particulas(self):
-        """Anima las partículas de fondo sutilmente"""
         if self.progreso <= 100:
             import random
             for p in self.particulas:
@@ -401,7 +397,7 @@ class SistemaMercado:
             elif self.pulso_scale <= 1.0:
                 self.pulso_dir = 1
             
-            # Calcular nuevo tamaño
+           
             base_size = 20
             nuevo_size = base_size * self.pulso_scale
             offset = nuevo_size / 2
@@ -410,7 +406,6 @@ class SistemaMercado:
                             450 - offset, 430 - offset,
                             450 + offset, 430 + offset)
             
-            # Cambiar opacidad (simulado con width)
             nuevo_width = max(1, int(3 - (self.pulso_scale - 1) * 3))
             self.canvas.itemconfig(self.anillo_pulso, width=nuevo_width)
             
@@ -422,13 +417,11 @@ class SistemaMercado:
             if widget != self.canvas:
                 widget.destroy()
         
-        # Recrear logos
         if self.logo_izquierdo:
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
         if self.logo_derecho:
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
         
-        # Header
         self.canvas.create_text(450, 40, 
                                text="Sistema de Análisis y Predicción de Precios", 
                                font=("Arial", 17, "bold"), 
@@ -461,18 +454,16 @@ class SistemaMercado:
                                  "Búsqueda y Exportación", "#06b6d4", self.modulo_consultas)
         
        
-        self.crear_boton_footer(450, 490, "🚪 Salir", "#dc2626", self.salir_sistema)
+        self.crear_boton_footer(450, 490, "Salir", "#dc2626", self.salir_sistema)
         
        
     
     def crear_tarjeta_modulo(self, x, y, icono, titulo, descripcion, color, comando):
         
-        # Fondo de tarjeta (guardamos ID para hover)
         tarjeta_id = self.canvas.create_rectangle(x-130, y-40, x+130, y+100, 
                                                   fill="#1e293b", outline=color, width=2,
                                                   tags=f"tarjeta_{x}_{y}")
         
-        # Icono con fondo circular
         self.canvas.create_oval(x-25, y-25, x+25, y+25, 
                                fill="#0a0f1e", outline=color, width=2,
                                tags=f"tarjeta_{x}_{y}")
@@ -482,28 +473,24 @@ class SistemaMercado:
                                fill=color,
                                tags=f"tarjeta_{x}_{y}")
         
-        # Título
         self.canvas.create_text(x, y+50, 
                                text=titulo, 
                                font=("Arial", 12, "bold"), 
                                fill="#e2e8f0",
                                tags=f"tarjeta_{x}_{y}")
         
-        # Descripción
         self.canvas.create_text(x, y+73, 
                                text=descripcion, 
                                font=("Arial", 9), 
                                fill="#94a3b8",
                                tags=f"tarjeta_{x}_{y}")
         
-        # EVENTOS DEL CANVAS (no más botones invisibles)
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Button-1>", lambda e: comando())
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Enter>", 
             lambda e: self.hover_tarjeta_enter(tarjeta_id, color))
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Leave>", 
             lambda e: self.hover_tarjeta_leave(tarjeta_id))
         
-        # Cambiar cursor
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Enter>", 
             lambda e: self.canvas.config(cursor="hand2"), add="+")
         self.canvas.tag_bind(f"tarjeta_{x}_{y}", "<Leave>", 
@@ -543,21 +530,18 @@ class SistemaMercado:
             if widget != self.canvas:
                 widget.destroy()
         
-        # Mostrar menú de opciones de gestión
         self.mostrar_submenu_gestion()
 
     def mostrar_submenu_gestion(self):
         self.canvas.delete("all")
         
-        # Recrear logos
         if self.logo_izquierdo:
             self.canvas.create_image(60, 50, image=self.logo_izquierdo, anchor="center")
         if self.logo_derecho:
             self.canvas.create_image(840, 50, image=self.logo_derecho, anchor="center")
         
-        # Título
         self.canvas.create_text(450, 100, 
-                               text="📊 GESTIÓN DE DATOS", 
+                               text="GESTIÓN DE DATOS", 
                                font=("Arial", 22, "bold"), 
                                fill="#10b981")
         
@@ -566,7 +550,6 @@ class SistemaMercado:
                                font=("Arial", 12), 
                                fill="#94a3b8")
         
-        # Tarjetas de opciones
         self.crear_tarjeta_modulo(270, 250, "🛒", "Productos", 
                                  "Catálogo de productos", "#10b981", 
                                  self.abrir_gestion_productos)
@@ -583,7 +566,6 @@ class SistemaMercado:
                                  "Categorías de productos", "#06b6d4", 
                                  self.abrir_gestion_categorias)
         
-        # Botón volver
         self.btn_volver = tk.Button(self.frame_principal,
                                    text="← Volver al Menú Principal",
                                    font=("Arial", 11, "bold"),

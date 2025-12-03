@@ -52,7 +52,7 @@ class GestionPrecios:
         print(f"✓ Cargados {len(self.df_mercados) if self.df_mercados is not None else 0} mercados")
     
     def crear_interfaz(self):
-        self.canvas.create_text(450, 30, text="💰 GESTIÓN DE PRECIOS", 
+        self.canvas.create_text(450, 30, text="GESTIÓN DE PRECIOS", 
                                font=("Arial", 20, "bold"), fill="#e2e8f0")
         
         self.canvas.create_text(450, 55, text="Registro de ofertas de productos en mercados", 
