@@ -72,23 +72,9 @@ class GestionPredicciones:
         for i, (x, y, icono, titulo, desc, color) in enumerate(modelos_config):
             self.crear_tarjeta_modelo(int(x), int(y), icono, titulo, desc, color, comandos[i])
         
-        self.canvas.create_rectangle(50, 380, 850, 500, fill="#1e293b", outline="#334155", width=2)
         
-        self.canvas.create_text(450, 400, text="⚙️ OPCIONES AVANZADAS",
-            font=("Arial", 12, "bold"), fill="#64748b")
         
-        opciones_config = np.array([
-            [200, 435, '🎯 Comparar Modelos', 'Evalúa qué modelo predice mejor', '#06b6d4'],
-            [450, 435, '🔍 Detección de Anomalías', 'Identifica picos inusuales', '#ec4899'],
-            [700, 435, '📊 Historial vs Predicción', 'Gráfico comparativo completo', '#8b5cf6']
-        ], dtype=object)
-        
-        comandos_avanzados = [self.comparar_modelos, self.detectar_anomalias, self.grafico_comparativo]
-        
-        for i, (x, y, titulo, desc, color) in enumerate(opciones_config):
-            self.crear_boton_opcion(int(x), int(y), titulo, desc, color, comandos_avanzados[i])
-        
-        self.canvas.create_rectangle(50, 515, 850, 545, fill="#1e293b", outline="#334155", width=1)
+        self.canvas.create_rectangle(50, 380, 850, 410, fill="#1e293b", outline="#334155", width=1)
         
         self.mostrar_estadisticas_prediccion()
         
@@ -96,7 +82,7 @@ class GestionPredicciones:
             font=("Arial", 11, "bold"), bg="#475569", fg="white",
             activebackground="#334155", relief=tk.FLAT, cursor="hand2",
             padx=20, pady=8, command=self.volver)
-        self.btn_volver.place(x=380, y=565)
+        self.btn_volver.place(x=380, y=430)
     
     def crear_tarjeta_modelo(self, x, y, icono, titulo, descripcion, color, comando):
         tag = f"modelo_{x}_{y}"
@@ -107,10 +93,10 @@ class GestionPredicciones:
         self.canvas.create_text(x-140, y, text=icono, font=("Arial", 20),
             fill=color, tags=tag)
         
-        self.canvas.create_text(x-20, y-8, text=titulo, font=("Arial", 11, "bold"),
+        self.canvas.create_text(x-110, y-8, text=titulo, font=("Arial", 11, "bold"),
             fill="#e2e8f0", anchor="w", tags=tag)
         
-        self.canvas.create_text(x-20, y+10, text=descripcion, font=("Arial", 8),
+        self.canvas.create_text(x-110, y+10, text=descripcion, font=("Arial", 8),
             fill="#64748b", anchor="w", tags=tag)
         
         self.canvas.tag_bind(tag, "<Button-1>", lambda e: comando())
@@ -123,27 +109,6 @@ class GestionPredicciones:
         self.canvas.tag_bind(tag, "<Leave>", 
             lambda e: self.canvas.config(cursor=""), add="+")
     
-    def crear_boton_opcion(self, x, y, titulo, descripcion, color, comando):
-        tag = f"opcion_{x}_{y}"
-        
-        rect_id = self.canvas.create_rectangle(x-110, y-22, x+110, y+22,
-            fill="#0f172a", outline=color, width=1, tags=tag)
-        
-        self.canvas.create_text(x, y-8, text=titulo, font=("Arial", 9, "bold"),
-            fill="#e2e8f0", tags=tag)
-        
-        self.canvas.create_text(x, y+8, text=descripcion, font=("Arial", 7),
-            fill="#64748b", tags=tag)
-        
-        self.canvas.tag_bind(tag, "<Button-1>", lambda e: comando())
-        self.canvas.tag_bind(tag, "<Enter>", 
-            lambda e: self.canvas.itemconfig(rect_id, outline=color, width=2))
-        self.canvas.tag_bind(tag, "<Leave>", 
-            lambda e: self.canvas.itemconfig(rect_id, outline=color, width=1))
-        self.canvas.tag_bind(tag, "<Enter>", 
-            lambda e: self.canvas.config(cursor="hand2"), add="+")
-        self.canvas.tag_bind(tag, "<Leave>", 
-            lambda e: self.canvas.config(cursor=""), add="+")
     
     def mostrar_estadisticas_prediccion(self):
         query = "SELECT COUNT(*) FROM historial_p;"
@@ -167,7 +132,7 @@ class GestionPredicciones:
         stats_text = (f"📊 Sistema: {num_ofertas} ofertas actuales | "
                      f"{num_historial} registros históricos | {capacidad}")
         
-        self.canvas.create_text(450, 530, text=stats_text, font=("Arial", 9), fill=color)
+        self.canvas.create_text(450, 395, text=stats_text, font=("Arial", 9), fill=color)
     
     def mostrar_sin_datos(self):
         self.canvas.create_rectangle(200, 200, 700, 350, fill="#1e293b", outline="#f59e0b", width=2)
@@ -1543,26 +1508,6 @@ Datos históricos: {len(df_datos)} registros
         canvas.create_text(legend_x+20, legend_y+30, text="Predicción",
             font=("Arial", 8), fill="#e2e8f0", anchor="w")
     
-    def comparar_modelos(self):
-        messagebox.showinfo("En desarrollo",
-            "🎯 Comparación de Modelos\n\n"
-            "Esta herramienta evaluará la precisión\n"
-            "de diferentes modelos y recomendará el mejor.\n\n"
-            "Próximamente disponible...")
-    
-    def detectar_anomalias(self):
-        messagebox.showinfo("En desarrollo",
-            "🔍 Detección de Anomalías\n\n"
-            "Este módulo identificará picos inusuales\n"
-            "o valores atípicos en el historial.\n\n"
-            "Próximamente disponible...")
-    
-    def grafico_comparativo(self):
-        messagebox.showinfo("En desarrollo",
-            "📊 Gráfico Comparativo\n\n"
-            "Visualización completa del historial\n"
-            "comparado con las predicciones futuras.\n\n"
-            "Próximamente disponible...")
     def guardar_prediccion(self, id_producto, precio_estimado, nivel_confianza, 
                       tendencia, fecha_objetivo, modelo_usado):
     
