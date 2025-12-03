@@ -440,30 +440,26 @@ class AnalisisEstadistico:
     
         alertas_generadas = []
     
-        # ALERTA 1: Precio muy por debajo del promedio (oportunidad de compra)
-        if precio_actual < precio_promedio * 0.85:  # 15% o más bajo
+        if precio_actual < precio_promedio * 0.85:  
             diferencia = ((precio_promedio - precio_actual) / precio_promedio) * 100
             mensaje = (f"🟢 OPORTUNIDAD DE COMPRA: {nombre_producto} está {diferencia:.1f}% "
                     f"por debajo del precio promedio ({precio_actual:.2f} Bs vs {precio_promedio:.2f} Bs)")
             self.insertar_alerta(1, mensaje, "precio_bajo", id_producto)
             alertas_generadas.append(("precio_bajo", mensaje))
     
-        # ALERTA 2: Precio muy por encima del promedio (advertencia)
-        elif precio_actual > precio_promedio * 1.15:  # 15% o más alto
+        elif precio_actual > precio_promedio * 1.15:  
             diferencia = ((precio_actual - precio_promedio) / precio_promedio) * 100
             mensaje = (f"🔴 PRECIO ELEVADO: {nombre_producto} está {diferencia:.1f}% "
                     f"por encima del precio promedio ({precio_actual:.2f} Bs vs {precio_promedio:.2f} Bs)")
             self.insertar_alerta(1, mensaje, "precio_alto", id_producto)
             alertas_generadas.append(("precio_alto", mensaje))
     
-        # ALERTA 3: Alta volatilidad
         if volatilidad_porcentaje > 20:
             mensaje = (f"⚠️ ALTA VOLATILIDAD: {nombre_producto} presenta variaciones de "
                     f"{volatilidad_porcentaje:.1f}%, lo que indica precios inestables")
             self.insertar_alerta(1, mensaje, "volatilidad_alta", id_producto)
             alertas_generadas.append(("volatilidad", mensaje))
     
-        # ALERTA 4: Precio estable (información positiva)
         elif volatilidad_porcentaje < 5:
             mensaje = (f"✅ PRECIO ESTABLE: {nombre_producto} tiene baja volatilidad "
                     f"({volatilidad_porcentaje:.1f}%), ideal para planificación")

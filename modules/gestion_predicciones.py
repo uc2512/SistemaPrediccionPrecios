@@ -1519,7 +1519,7 @@ Datos históricos: {len(df_datos)} registros
             
         conn = DatabaseConnection.get_connection()
         if not conn:
-            print("❌ Error: No se pudo obtener conexión a la BD")
+            print("Error: No se pudo obtener conexión a la BD")
             return None
     
         try:
@@ -1558,11 +1558,11 @@ Datos históricos: {len(df_datos)} registros
                 return None
             
         except Exception as e:
-            print(f"❌ Error al guardar predicción: {e}")
+            print(f"Error al guardar predicción: {e}")
             import traceback
-            traceback.print_exc()  # Imprime el error completo para debugging
+            traceback.print_exc()  
             if conn:
-                conn.rollback()  # Revertir cambios en caso de error
+                conn.rollback() 
                 DatabaseConnection.return_connection(conn)
             return None
     

@@ -394,7 +394,7 @@ class GestionPrecios:
             self.canvas.itemconfig("stats_text", text=stats_text, fill=color)
         else:
             self.canvas.itemconfig("stats_text", 
-                text="📊 Este es el único registro de este producto", fill="#64748b")
+                text="Este es el único registro de este producto", fill="#64748b")
     
     def eliminar_oferta(self):
         seleccion = self.tree.selection()
@@ -424,7 +424,7 @@ class GestionPrecios:
                     execute_query(reset_query)
                     messagebox.showinfo("Éxito", 
                         "Oferta eliminada correctamente\n\n"
-                        "✓ Secuencia de IDs reiniciada (tabla vacía)")
+                        "Secuencia de IDs reiniciada (tabla vacía)")
                 else:
                     messagebox.showinfo("Éxito", "Oferta eliminada correctamente")
                 

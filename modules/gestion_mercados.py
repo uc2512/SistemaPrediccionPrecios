@@ -11,7 +11,6 @@ class GestionMercados:
         self.frame_principal = frame_principal
         self.volver_menu = volver_menu
         
-        # Variables
         self.df_mercados = None
         self.mercado_seleccionado = None
         self.item_seleccionado = None  
@@ -82,10 +81,10 @@ class GestionMercados:
         self.entries['direccion'].place(x=200, y=y_base + spacing*3 - 10)
         
         btn_config = [
-            ('agregar', "✚ Agregar", "#10b981", "#059669", 50, self.agregar_mercado),
-            ('editar', "✎ Editar", "#f59e0b", "#d97706", 170, self.editar_mercado),
-            ('eliminar', "🗑 Eliminar", "#dc2626", "#991b1b", 630, self.eliminar_mercado),
-            ('limpiar', "⟲ Limpiar", "#6366f1", "#4f46e5", 750, self.limpiar_formulario)
+            ('agregar', "Agregar", "#10b981", "#059669", 50, self.agregar_mercado),
+            ('editar', "Editar", "#f59e0b", "#d97706", 170, self.editar_mercado),
+            ('eliminar', "Eliminar", "#dc2626", "#991b1b", 630, self.eliminar_mercado),
+            ('limpiar', "Limpiar", "#6366f1", "#4f46e5", 750, self.limpiar_formulario)
         ]
         
         btn_y = 273
@@ -206,7 +205,7 @@ class GestionMercados:
                     row.id, row.nombre, row.ciudad, row.depto,
                     row.barrio, row.avenida, row.estado_texto
                 ))
-                print(f"📊 Insertado: {row.nombre} con ID {row.id}")
+                print(f"Insertado: {row.nombre} con ID {row.id}")
     
     def obtener_datos_formulario(self):
         return {key: entry.get().strip() for key, entry in self.entries.items()}
@@ -235,13 +234,13 @@ class GestionMercados:
             messagebox.showerror("Error", "No se pudo agregar el mercado")
     
     def seleccionar_mercado(self, event):
-        print("🔍 seleccionar_mercado() llamado")
+        print("seleccionar_mercado() llamado")
         
         seleccion = self.tree.selection()
         print(f"   Selección actual: {seleccion}")
         
         if not seleccion:
-            print("   ⚠️ No hay selección")
+            print("   No hay selección")
             return
         
         for item in self.tree.get_children():
@@ -251,18 +250,18 @@ class GestionMercados:
         item_data = self.tree.item(self.item_seleccionado)
         valores = item_data['values']
         
-        print(f"   ✅ Valores obtenidos: {valores}")
+        print(f"  Valores obtenidos: {valores}")
     
         self.mercado_seleccionado = valores[0]
-        print(f"   💾 ID guardado: {self.mercado_seleccionado}")
+        print(f"  ID guardado: {self.mercado_seleccionado}")
         
         self.tree.item(self.item_seleccionado, tags=('selected',))
         
         try:
             self.tree.tag_configure('selected', background='#3b82f6', foreground='white')
-            print("   🎨 Tag 'selected' aplicado")
+            print("  Tag 'selected' aplicado")
         except Exception as e:
-            print(f"   ❌ Error aplicando tag: {e}")
+            print(f"  Error aplicando tag: {e}")
         
         if self.df_mercados is not None:
             try:
@@ -372,7 +371,6 @@ class GestionMercados:
         for item in self.tree.get_children():
             self.tree.item(item, tags=())
         
-        # Deseleccionar en el tree
         self.tree.selection_remove(*self.tree.selection())
         
         print("   Formulario limpiado")

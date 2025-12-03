@@ -2,14 +2,16 @@ import tkinter as tk
 from tkinter import font
 from PIL import Image, ImageTk
 import time
+from tkinter import messagebox
 from database.connection import DatabaseConnection  
 from modules.gestion import GestionProductos
+from modules.gestion_categorias import GestionCategorias
 from modules.gestion_mercados import GestionMercados
 from modules.gestion_precios import GestionPrecios
-from tkinter import messagebox
 from modules.analisis_estadistico import AnalisisEstadistico
 from modules.gestion_consultas import GestionConsultas
 from modules.gestion_predicciones import GestionPredicciones
+
 
 class SistemaMercado:
     def __init__(self, root):
@@ -352,7 +354,6 @@ class SistemaMercado:
             if widget != self.canvas:
                 widget.destroy()
         
-        from modules.gestion_categorias import GestionCategorias
         GestionCategorias(
             self.canvas, 
             self.frame_principal, 
